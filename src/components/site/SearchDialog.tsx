@@ -96,7 +96,7 @@ export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange
         id: `f-${f.id}`,
         group: "faqs" as const,
         label: f.question,
-        route: "#/faq",
+        route: `#/faq?q=${f.id}`,
       })),
     ];
     return [...dynamic, ...PAGE_ENTRIES];

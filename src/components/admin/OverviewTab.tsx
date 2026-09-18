@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarClock,
@@ -38,6 +39,35 @@ interface StatsDTO {
   trend: { date: string; count: number }[];
 }
 
+function useCountUp(target: number, duration = 750): number {
+  const [display, setDisplay] = useState(0);
+  const prevRef = useRef(0);
+
+  useEffect(() => {
+    const from = prevRef.current;
+    prevRef.current = target;
+    if (from === target) return;
+    const reduced =
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    if (reduced) {
+      raf = requestAnimationFrame(() => setDisplay(target));
+      return () => cancelAnimationFrame(raf);
+    }
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setDisplay(Math.round(from + (target - from) * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+
+  return display;
+}
+
 function StatCard({
   icon,
   label,
@@ -51,6 +81,7 @@ function StatCard({
   badge?: string;
   hint?: string;
 }) {
+  const shown = useCountUp(value);
   return (
     <Card className="card-lift border-white/10 bg-card p-0">
       <CardContent className="p-5">
@@ -62,7 +93,7 @@ function StatCard({
             </span>
           )}
         </div>
-        <p className="mt-3 font-display text-3xl tracking-tight text-ink">{value}</p>
+        <p className="mt-3 font-display text-3xl tracking-tight text-ink" aria-label={String(value)}>{shown}</p>
         <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ash">{label}</p>
         {hint && <p className="mt-1 text-xs text-ash">{hint}</p>}
       </CardContent>

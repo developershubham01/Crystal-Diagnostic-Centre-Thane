@@ -12,6 +12,7 @@ import {
   FilterX,
   Home,
   Mail,
+  MessageCircle,
   Phone,
   Printer,
   Search,
@@ -136,6 +137,24 @@ const PRINT_STYLES = `
  * dedicated popup window (black on white for paper) and invokes printing.
  * Internal notes are deliberately excluded from the printout.
  */
+/**
+ * WhatsApp reminder deep link — opens a chat with the patient pre-filled with
+ * their reference, test, preferred slot and a one-tap tracking link (the same
+ * reference+mobile deep link the CSV export uses).
+ */
+function whatsappReminderUrl(a: AppointmentDTO): string {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const datePart = a.preferredDate
+    ? `Preferred slot: ${a.preferredDate}${a.preferredTime ? ` · ${a.preferredTime}` : ""}`
+    : "";
+  const lines = [
+    `Namaste ${a.name}, this is Crystal Diagnostic Centre (Uthalsar Naka, Thane West).`,
+    `Regarding your request ${a.reference} — ${a.testOrPackage}${datePart ? `\n${datePart}` : ""}`,
+    `Track your request anytime: ${origin}/#/track?reference=${a.reference}&mobile=${a.mobile}`,
+  ];
+  return `https://wa.me/91${a.mobile}?text=${encodeURIComponent(lines.filter(Boolean).join("\n"))}`;
+}
+
 function printAppointmentSlip(a: AppointmentDTO): void {
   const esc = (s: unknown) =>
     String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
@@ -161,7 +180,7 @@ function printAppointmentSlip(a: AppointmentDTO): void {
     <tr><td class="k">Received</td><td>${esc(received)}</td></tr>
   </table>
   <div class="sign"><span>Patient signature</span><span>Front desk</span></div>
-  <div class="foot">Track this request any time at ${esc(`${location.origin}/#/track?reference=${a.reference}`)} with the reference code and the booked mobile number. This is an appointment request summary, not a medical report or bill.</div>
+  <div class="foot">Track this request any time at ${esc(`${location.origin}/#/track?reference=${a.reference}&mobile=${a.mobile}`)} with the reference code and the booked mobile number. This is an appointment request summary, not a medical report or bill.</div>
   <script>window.onload = function () { window.focus(); window.print(); };</script>
 </body></html>`;
   openPrintWindow(html);
@@ -305,6 +324,17 @@ function AppointmentDetailDialog({
               >
                 <Printer className="h-4 w-4" aria-hidden />
                 Print summary
+              </Button>
+              <Button asChild size="sm" variant="outline" className="w-full sm:w-auto">
+                <a
+                  href={whatsappReminderUrl(appointment)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open WhatsApp chat with the patient for ${appointment.reference}`}
+                >
+                  <MessageCircle className="h-4 w-4" aria-hidden />
+                  WhatsApp patient
+                </a>
               </Button>
               {appointment.status === "SCHEDULED" && appointment.preferredDate && (
                 <Button

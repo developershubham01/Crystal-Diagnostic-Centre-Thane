@@ -360,3 +360,22 @@ Stage Summary:
 - Reception attention is now fully instrumented: gold alert chips cover both inbound channels (appointment requests + contact messages), self-clearing as staff work through them.
 - Design vocabulary extended: aero-cut search palette + nav hover underline documented in DESIGN.md.
 - Known/next: FAQ entries all deep-link to #/faq (no per-question anchors — could add ids later); palette data is client-cached per mount (refetches on remount, fine at this scale); PWA service worker still intentionally absent.
+---
+Task ID: 13 (cron round)
+Agent: Z.ai Code (lead)
+Task: FAQ deep links (auto-expand + gold highlight) + WhatsApp patient reminder + count-up admin stats
+
+Work Log:
+- STATUS ASSESSMENT: worklog reviewed (Tasks 1–12 complete); health check — all public APIs 200, console clean, dev.log clean (the single ⨯ is the documented Task-11 HMR line) → no bugs; proceeded to feature round.
+- FEATURE — FAQ DEEP LINKS (closes Task-12 known/next): search-palette FAQ results now route to `#/faq?q=<faqId>`. FaqPage keeps per-category controlled accordions (value map) and applies the deep link three ways: (1) one-time seed at mount (useState initializer reading the hash), (2) a hashchange listener so links arriving while the page is already mounted also work, (3) guard via lastApplied ref (not set until actually applied — the initial StrictMode-style ref-guard + rAF cleanup pattern was the bug: first run set the guard, its cleanup cancelled the rAF, second run bailed). Applied target: accordion auto-expands, item gets a 4s gold ring highlight (inset ring-gold/40 + bg-gold/[0.06], transition-colors), then smooth-scrolls to centre via data-faq-id. VERIFIED all three paths (fresh load, SPA nav from #/, hashchange while on #/faq) on desktop and mobile 390px (screenshot: gold-ringed expanded answer centred).
+- FEATURE — WHATSAPP PATIENT REMINDER (admin): AppointmentsTab dialog gains a "WhatsApp patient" outline button (MessageCircle) → wa.me/91<mobile> with a pre-filled, decode-verified template: greeting with patient name, reference + test (+ preferred slot when set) and a one-tap track URL (`#/track?reference=…&mobile=…`, same shape as the CSV export). Also aligned the printed slip's track-URL footnote to include &mobile= so paper handouts are one-tap too.
+- STYLE (mandatory) — COUNT-UP STATS: admin Overview StatCards now animate numerals 0 → value over 750ms (ease-out cubic via rAF; true value in aria-label; instant under prefers-reduced-motion). Sampled mid-animation at 550ms (intermediates 1/1/0/1/5/2/2/4) → finals (3/3/1/2/12/5/6/10) match /api/admin/stats exactly.
+- DEBUGGED: (1) agent-browser `open` with only a hash change is a SAME-DOCUMENT navigation — my first two "broken deep link" readings were the still-mounted pre-query page instance; forced full loads with a cache-buster search param (?r=N) to test for real. (2) react-hooks/set-state-in-effect errors from direct setState in effects → moved work into rAF callbacks (deterministic + lint-clean). (3) Transient debug probes (data-debug-*) added then removed after diagnosis.
+- QA: eslint . → 0 problems; tsc clean (outside pre-existing examples/skills noise); agent-browser — palette FAQ select lands expanded+highlighted; WhatsApp button href/aria-label/target verified in the dialog; count-up verified above; dev.log clean.
+- DOCS: DESIGN.md — Site Search Palette entry extended with the FAQ deep-link behaviour; new Count-Up Stat Numerals entry.
+
+Stage Summary:
+- Every FAQ now has a shareable address: palette results (and any future link/campaign) open the exact answer, expanded, gold-flashed and centred — on any navigation path.
+- Front-desk outreach is one click: the appointment dialog now drafts the full WhatsApp reminder (reference, test, slot, track link) to the patient's number.
+- The dashboard feels alive without leaving the monochrome+gold language: numbers count in, aria-safe, motion-reduced aware.
+- Known/next: FAQ deep links depend on the faq id (stable cuid); if the centre reorders categories nothing breaks. WhatsApp reminder message is English-only for now. PWA service worker still intentionally absent.

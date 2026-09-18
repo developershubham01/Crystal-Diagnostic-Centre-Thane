@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HelpCircle, MessageCircleQuestion, Phone, Search } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { useRouterStore } from "@/lib/store";
 import { useFaqs, useSettings } from "@/lib/hooks";
 import { usePageMeta } from "@/lib/seo";
 import { BUSINESS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import type { FaqDTO as FaqDTOModel } from "@/lib/api-client";
 import { EmptyState, ErrorState } from "./PageStates";
 
@@ -28,6 +29,50 @@ export function FaqPage() {
   const crumbs = [{ label: "FAQ" }];
   const [query, setQuery] = useState("");
   const normalizedQuery = query.trim().toLowerCase();
+
+  // Per-category controlled accordions (deep links open a specific question)
+  const [openMap, setOpenMap] = useState<Record<string, string>>({});
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+
+  // Deep-link seed: #/faq?q=<faqId> opens + scrolls to that answer once.
+  const [pendingFaq] = useState(() => {
+    if (typeof window === "undefined") return null;
+    const m = /[?&]q=([A-Za-z0-9_-]+)/.exec(window.location.hash);
+    return m ? m[1] : null;
+  });
+  // Also react to deep links that arrive while the page is already mounted
+  // (same-document hash navigations — e.g. a shared link opened from #/faq).
+  const lastApplied = useRef<string | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => {
+    const apply = (id: string) => {
+      if (lastApplied.current === id || !faqs) return;
+      const faq = faqs.find((f) => f.id === id);
+      if (!faq) return;
+      lastApplied.current = id;
+      const cat = faq.category?.trim() || "General";
+      setOpenMap((m) => ({ ...m, [cat]: faq.id }));
+      setHighlightId(faq.id);
+      const scroll = setTimeout(() => {
+        document
+          .querySelector(`[data-faq-id="${faq.id}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+      const clear = setTimeout(() => setHighlightId(null), 4000);
+      timers.current.push(scroll, clear);
+    };
+    if (pendingFaq) apply(pendingFaq);
+    const onHash = () => {
+      const m = /[?&]q=([A-Za-z0-9_-]+)/.exec(window.location.hash);
+      if (m) apply(m[1]);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+    };
+  }, [faqs, pendingFaq]);
 
   const all = useMemo(() => faqs ?? [], [faqs]);
 
@@ -156,9 +201,23 @@ export function FaqPage() {
                     </h2>
                     <span className="metal-badge">{group.items.length}</span>
                   </div>
-                  <Accordion type="single" collapsible className="mt-4 border border-white/10 bg-card px-5">
+                  <Accordion
+                    type="single"
+                    collapsible
+                    className="mt-4 border border-white/10 bg-card px-5"
+                    value={openMap[group.category]}
+                    onValueChange={(v) => setOpenMap((m) => ({ ...m, [group.category]: v }))}
+                  >
                     {group.items.map((faq) => (
-                      <AccordionItem key={faq.id} value={faq.id} className="border-white/10">
+                      <AccordionItem
+                        key={faq.id}
+                        value={faq.id}
+                        data-faq-id={faq.id}
+                        className={cn(
+                          "border-white/10 transition-colors duration-500",
+                          highlightId === faq.id && "bg-gold/[0.06] ring-1 ring-inset ring-gold/40"
+                        )}
+                      >
                         <AccordionTrigger className="min-h-[44px] py-4 text-[13px] font-semibold uppercase tracking-[0.02em] text-ink hover:text-gold hover:no-underline [&>svg]:text-gold">
                           {faq.question}
                         </AccordionTrigger>
