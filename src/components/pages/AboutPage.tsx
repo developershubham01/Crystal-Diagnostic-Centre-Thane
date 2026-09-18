@@ -3,6 +3,7 @@
 import { Eye, HeartHandshake, MapPin, Navigation, Phone, Target, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
+import { TestimonialsSection } from "@/components/site/TestimonialsSection";
 import { Breadcrumbs, JsonLd, PageHero, breadcrumbSchema } from "@/components/site/Shared";
 import { useRouterStore } from "@/lib/store";
 import { useSettings } from "@/lib/hooks";
@@ -157,6 +158,9 @@ export function AboutPage() {
             </section>
           </Reveal>
         </div>
+
+        {/* Patient voices — shared band (home + about) */}
+        <TestimonialsSection />
 
         {/* Location & contact strip */}
         <Reveal>

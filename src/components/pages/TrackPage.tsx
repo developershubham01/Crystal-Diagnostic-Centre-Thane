@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { CalendarCheck, CalendarPlus, ClipboardList, Loader2, MapPin, Phone, Search, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CalendarCheck, CalendarPlus, ClipboardList, Loader2, MapPin, MessageCircle, Phone, Search, ShieldCheck } from "lucide-react";
 import { api, ApiError } from "@/lib/api-client";
 import { usePageMeta } from "@/lib/seo";
 import { BUSINESS } from "@/lib/constants";
@@ -95,20 +95,54 @@ export function TrackPage() {
   const [result, setResult] = useState<TrackResult | null>(null);
   const [seeded, setSeeded] = useState(false);
 
-  // One-time render-phase sync: prefill the reference from a deep link
-  // such as #/track?reference=CDC-XXXXXX (runs after hydration, so no
-  // SSR mismatch; safe because this lazy page never renders on the server).
+  // One-time render-phase sync: prefill the reference (and optionally the
+  // mobile number) from a deep link such as #/track?reference=CDC-XXXXXX
+  // (runs after hydration, so no SSR mismatch; safe because this lazy page
+  // never renders on the server).
   if (!seeded) {
     setSeeded(true);
     const fromHash = typeof window !== "undefined" ? window.location.hash : "";
     const match = /[?&]reference=([A-Za-z0-9-]+)/.exec(fromHash);
     if (match) setReference(match[1].toUpperCase());
+    const mobMatch = /[?&]mobile=(\d{10})/.exec(fromHash);
+    if (mobMatch) setMobile(mobMatch[1]);
   }
 
   const meta = result ? STATUS_META[result.status] ?? STATUS_META.NEW : null;
 
   const refValid = useMemo(() => /^cdc-[a-z2-9]{6,12}$/i.test(reference.trim()), [reference]);
   const mobileValid = useMemo(() => /^[6-9]\d{9}$/.test(mobile.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "").replace(/^0(?=\d{10}$)/, "")), [mobile]);
+
+  async function runLookup(refCode: string, mob: string) {
+    setError(null);
+    setLoading(true);
+    try {
+      const data = await api.get<TrackResult>(
+        `/api/appointments/track?reference=${encodeURIComponent(refCode)}&mobile=${mob}`
+      );
+      setResult(data);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      setResult(null);
+      const message = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Deep links that carry BOTH the reference and the mobile number (front-desk
+  // shares, CSV export, print slips) resolve immediately — one attempt only.
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current) return;
+    const fromHash = window.location.hash;
+    const refMatch = /[?&]reference=([A-Za-z0-9-]+)/.exec(fromHash);
+    const mobMatch = /[?&]mobile=(\d{10})/.exec(fromHash);
+    if (!refMatch || !mobMatch) return;
+    autoRan.current = true;
+    void runLookup(refMatch[1].toUpperCase(), mobMatch[1]);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -121,22 +155,8 @@ export function TrackPage() {
       setError("Enter the 10-digit mobile number you provided at booking.");
       return;
     }
-
-    setLoading(true);
-    try {
-      const cleanMobile = mobile.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "").replace(/^0(?=\d{10}$)/, "");
-      const data = await api.get<TrackResult>(
-        `/api/appointments/track?reference=${encodeURIComponent(reference.trim().toUpperCase())}&mobile=${cleanMobile}`
-      );
-      setResult(data);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      setResult(null);
-      const message = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    const cleanMobile = mobile.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "").replace(/^0(?=\d{10}$)/, "");
+    await runLookup(reference.trim().toUpperCase(), cleanMobile);
   }
 
   return (
@@ -345,6 +365,21 @@ export function TrackPage() {
                           Add to Calendar
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const shareUrl = `${window.location.origin}/#/track?reference=${result.reference}`;
+                          const text = `Crystal Diagnostic Centre — appointment ${result.reference}. Track your status: ${shareUrl}`;
+                          window.open(
+                            `https://wa.me/?text=${encodeURIComponent(text)}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          );
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4" aria-hidden />
+                        Share via WhatsApp
+                      </Button>
                       <Button
                         variant="outline"
                         onClick={() => {

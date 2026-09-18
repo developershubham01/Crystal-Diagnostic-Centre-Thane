@@ -21,6 +21,7 @@ import { useSettings } from "@/lib/hooks";
 import { useRouterStore } from "@/lib/store";
 import { useServices, usePackages } from "@/lib/hooks";
 import { BUSINESS } from "@/lib/constants";
+import { DEFAULT_HOURS, parseWorkingHours, type WeekHours } from "@/components/site/OpenNowBadge";
 import { Breadcrumbs, JsonLd, PageHero, breadcrumbSchema, type Crumb } from "@/components/site/Shared";
 import { Reveal } from "@/components/site/Reveal";
 import { TrackerQr } from "@/components/site/TrackerQr";
@@ -89,10 +90,19 @@ function normaliseMobile(raw: string): string {
   return digits;
 }
 
+/** Today's date in the centre's timezone (Asia/Kolkata) as YYYY-MM-DD. */
 function todayIso(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+/** Weekday index (0 = Sunday) for a YYYY-MM-DD date, evaluated in IST. */
+function weekdayOf(dateIso: string): number {
+  return new Date(`${dateIso}T12:00:00+05:30`).getDay();
 }
 
 function FieldError({ id, message }: { id: string; message?: string }) {
@@ -122,6 +132,27 @@ export function BookTestPage() {
 
   const minDate = useMemo(todayIso, []);
 
+  // Centre visiting hours (admin-editable) drive date validation — closed
+  // days can't be requested, so patients never pick a dead slot.
+  const weekHours: WeekHours = useMemo(
+    () => parseWorkingHours(settings.workingHours) ?? DEFAULT_HOURS,
+    [settings.workingHours]
+  );
+
+  const dateIssue = useMemo(
+    () =>
+      (dateIso: string): string | null => {
+        if (!dateIso) return null;
+        if (dateIso < minDate) return "Please choose today or a future date.";
+        if (!weekHours[weekdayOf(dateIso)]) {
+          return "The centre is closed on this day — please pick another date.";
+        }
+        return null;
+      },
+    [minDate, weekHours]
+  );
+  const liveDateIssue = dateIssue(form.preferredDate);
+
   // value -> display label for the test/package dropdown
   const testOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -130,6 +161,9 @@ export function BookTestPage() {
     map.set(OTHER_OPTION, "Other (specify in message)");
     return map;
   }, [services, packages]);
+
+  /** Human label of the chosen test/package — drives the live summary plate. */
+  const summaryTest = form.testValue ? (testOptions.get(form.testValue) ?? null) : null;
 
   // Preparation guidance for the currently selected service/package —
   // surfaced right under the dropdown so patients book correctly first time.
@@ -160,6 +194,8 @@ export function BookTestPage() {
       errs.email = "Enter a valid email address (or leave it blank).";
     }
     if (!form.testValue) errs.testValue = "Please choose a test, package, or 'Other'.";
+    const dateProblem = form.preferredDate ? dateIssue(form.preferredDate) : null;
+    if (dateProblem) errs.preferredDate = dateProblem;
     if (form.message.length > 2000) errs.message = "Message is too long (max 2000 characters).";
     if (!form.consent) errs.consent = "Please provide consent so our team can contact you.";
     return errs;
@@ -499,9 +535,17 @@ export function BookTestPage() {
                             min={minDate}
                             value={form.preferredDate}
                             onChange={(e) => set("preferredDate", e.target.value)}
+                            aria-invalid={!!liveDateIssue}
+                            aria-describedby={liveDateIssue ? "book-date-issue" : "book-date-hint"}
                             className="mt-1.5 border-white/15 bg-iron text-ink focus-visible:border-gold focus-visible:ring-gold/40"
                           />
-                          <p className="mt-1.5 text-xs text-inkmuted">Optional — final slot is confirmed by phone.</p>
+                          {liveDateIssue ? (
+                            <p id="book-date-issue" role="alert" aria-live="polite" className="mt-1.5 text-xs font-medium text-destructive">
+                              {liveDateIssue}
+                            </p>
+                          ) : (
+                            <p id="book-date-hint" className="mt-1.5 text-xs text-inkmuted">Optional — final slot is confirmed by phone.</p>
+                          )}
                         </div>
                         <div>
                           <Label htmlFor="book-time" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
@@ -589,6 +633,41 @@ export function BookTestPage() {
                         </label>
                         <FieldError id="book-consent-error" message={errors.consent} />
                       </div>
+
+                      {/* Live request summary — aero-cut plate with gold corner ticks */}
+                      {summaryTest && (
+                        <div className="relative border border-white/10 bg-white/[0.03] p-4" aria-live="polite">
+                          <span aria-hidden className="absolute left-0 top-0 h-2.5 w-2.5 border-l-2 border-t-2 border-gold" />
+                          <span aria-hidden className="absolute right-0 top-0 h-2.5 w-2.5 border-r-2 border-t-2 border-gold" />
+                          <span aria-hidden className="absolute bottom-0 left-0 h-2.5 w-2.5 border-b-2 border-l-2 border-gold" />
+                          <span aria-hidden className="absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-gold" />
+                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-text">
+                            Your request at a glance
+                          </p>
+                          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] sm:grid-cols-4">
+                            <div>
+                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Test / Package</dt>
+                              <dd className="mt-0.5 truncate font-semibold text-ink" title={summaryTest}>{summaryTest}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Date</dt>
+                              <dd className="mt-0.5 font-semibold text-ink">
+                                {form.preferredDate
+                                  ? new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${form.preferredDate}T12:00:00+05:30`))
+                                  : "—"}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Time</dt>
+                              <dd className="mt-0.5 font-semibold text-ink">{form.preferredTime || "Any time"}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Mode</dt>
+                              <dd className="mt-0.5 font-semibold text-ink">{form.homeCollection ? "Home collection" : "Centre visit"}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                      )}
 
                       <Button type="submit" size="lg" disabled={submitting} className="w-full">
                         {submitting ? (

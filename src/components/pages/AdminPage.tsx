@@ -343,6 +343,17 @@ export function AdminPage() {
   const [tab, setTab] = useState<AdminTabId>("overview");
   const { toast } = useToast();
 
+  // Lightweight poll for unread appointment requests — powers the gold alert
+  // badge on the sidebar. Shares the "admin-appointments" key prefix, so any
+  // status change made in the tab refreshes the badge instantly.
+  const newApptQuery = useQuery({
+    queryKey: ["admin-appointments", "new-badge"],
+    queryFn: () => api.get<{ id: string }[]>("/api/appointments?status=NEW"),
+    enabled: phase === "authed",
+    refetchInterval: 30_000,
+  });
+  const newRequests = phase === "authed" ? (newApptQuery.data?.length ?? 0) : 0;
+
   useEffect(() => {
     let live = true;
     api
@@ -393,7 +404,7 @@ export function AdminPage() {
   }
 
   return (
-    <AdminLayout admin={admin} active={tab} onNavigate={setTab} onLogout={handleLogout}>
+    <AdminLayout admin={admin} active={tab} onNavigate={setTab} onLogout={handleLogout} newRequests={newRequests}>
       {renderTab(tab, setTab)}
     </AdminLayout>
   );

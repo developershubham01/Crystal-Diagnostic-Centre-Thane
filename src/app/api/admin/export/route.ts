@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       a.homeCollection ? "yes" : "no",
       a.status,
       a.consent ? "yes" : "no",
-      `${origin}/#/track?reference=${encodeURIComponent(a.reference)}`,
+      `${origin}/#/track?reference=${encodeURIComponent(a.reference)}&mobile=${a.mobile}`,
       a.message,
       a.internalNotes,
     ]);

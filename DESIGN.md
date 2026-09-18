@@ -158,6 +158,8 @@ All buttons use **zero border-radius** — sharp, angular rectangles that echo t
 - **CTA Light Sweep** (`.btn-sheen`): the primary gold button carries a diagonal white light sweep (32% → 50% → 32% gradient, skewX -18°, 0.7s ease-out) that crosses on hover — an aero-premium cue. Disabled automatically under `prefers-reduced-motion`.
 - **Reading-Progress Fill (back-to-top)**: the hexagonal back-to-top FAB fills from the bottom with `bg-gold/15` in proportion to page scroll (same 0..1 progress formula as the header hairline) and appears only after ~560px of scroll.
 - **Aero-Cut QR Frame** (`TrackerQr`): tracker QR codes render in a white scanner-safe tile framed by four 2px gold corner brackets (top-left/top-right/bottom-left/bottom-right), with an uppercase micro caption below.
+- **Aero-Cut Summary Plate**: live "request at a glance" plates (booking form) use `border-white/10 bg-white/[0.03]` with four absolute gold corner ticks (2px L-brackets at each corner, `h/w-2.5`) — the two-dimensional sibling of the QR frame; uppercase micro heading in `text-gold-text`, data in a 2/4-column `dl`.
+- **Alert Count Chip (admin)**: sidebar nav items can carry a solid-gold square count chip (`bg-gold text-black`, no radius, caps at "9+") — used on Appointment Requests for unread `NEW` requests (30s poll, invalidates on any status change).
 
 ## 5. Layout Principles
 

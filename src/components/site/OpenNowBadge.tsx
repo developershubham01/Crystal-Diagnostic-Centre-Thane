@@ -25,7 +25,7 @@ interface LocalNow {
 
 export type WeekHours = Record<number, [number, number]>; // [openMin, closeMin]
 
-const DEFAULT_HOURS: WeekHours = {
+export const DEFAULT_HOURS: WeekHours = {
   0: [7 * 60, 13 * 60], // Sunday
   1: [7 * 60, 21 * 60],
   2: [7 * 60, 21 * 60],
