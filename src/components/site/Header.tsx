@@ -16,6 +16,7 @@ const NAV = [
   { label: "Services", route: "#/services" },
   { label: "Packages", route: "#/packages" },
   { label: "Gallery", route: "#/gallery" },
+  { label: "Track", route: "#/track" },
   { label: "FAQ", route: "#/faq" },
   { label: "Contact", route: "#/contact" },
 ];

@@ -105,7 +105,7 @@ function MessageDetailDialog({
 
   return (
     <Dialog open={!!messageId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         {message ? (
           <>
             <DialogHeader>
@@ -156,7 +156,7 @@ function MessageDetailDialog({
 
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wide text-inkmuted">Message</p>
-                <p className="mt-1 whitespace-pre-line rounded-xl bg-soft/70 p-3 text-sm leading-relaxed text-ink">
+                <p className="mt-1 whitespace-pre-line bg-soft/70 p-3 text-sm leading-relaxed text-ink">
                   {message.message}
                 </p>
               </div>
@@ -172,7 +172,7 @@ function MessageDetailDialog({
                     patch.mutate({ status: v });
                   }}
                 >
-                  <SelectTrigger id="message-status" className="mt-1.5 w-full rounded-xl sm:w-64">
+                  <SelectTrigger id="message-status" className="mt-1.5 w-full sm:w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,13 +196,13 @@ function MessageDetailDialog({
                   placeholder="e.g. Replied by email on 12 Jan — needs callback."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="mt-1.5 rounded-xl"
+                  className="mt-1.5"
                 />
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="rounded-xl"
+                   
                     disabled={patch.isPending || notes === (message.internalNotes ?? "")}
                     onClick={() => patch.mutate({ internalNotes: notes })}
                   >
@@ -217,7 +217,7 @@ function MessageDetailDialog({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="rounded-xl text-destructive hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
+                      className="text-destructive hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
                       disabled={remove.isPending}
                     >
                       {remove.isPending ? "Deleting…" : "Delete message"}
@@ -293,7 +293,7 @@ export function MessagesTab() {
         title="Contact Messages"
         description="Enquiries from the public contact form. Open a message to respond, update its status and record follow-up notes."
         actions={
-          <Button variant="outline" className="rounded-xl" onClick={() => window.open("/api/admin/export?type=messages", "_blank")}>
+          <Button variant="outline" onClick={() => window.open("/api/admin/export?type=messages", "_blank")}>
             <Download className="h-4 w-4" aria-hidden />
             Export CSV
           </Button>
@@ -301,7 +301,7 @@ export function MessagesTab() {
       />
 
       {/* Filters */}
-      <div className="mb-4 grid gap-3 rounded-2xl border border-brandborder bg-card p-4 sm:grid-cols-2">
+      <div className="mb-4 grid gap-3 border border-brandborder bg-card p-4 sm:grid-cols-2">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-inkmuted" aria-hidden />
           <Input
@@ -309,13 +309,13 @@ export function MessagesTab() {
             placeholder="Search name, phone, subject or message…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-xl pl-9"
+            className="pl-9"
             aria-label="Search messages"
           />
         </div>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full rounded-xl" aria-label="Filter by status">
+            <SelectTrigger className="w-full" aria-label="Filter by status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -331,7 +331,7 @@ export function MessagesTab() {
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0 rounded-xl"
+              className="shrink-0"
               aria-label="Clear filters"
               title="Clear filters"
               onClick={() => {
@@ -348,7 +348,7 @@ export function MessagesTab() {
       {list.isLoading ? (
         <ListSkeleton rows={6} />
       ) : list.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">
             Could not load messages. Please refresh.
           </CardContent>

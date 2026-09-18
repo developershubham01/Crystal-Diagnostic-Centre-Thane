@@ -51,17 +51,19 @@ function StatCard({
   hint?: string;
 }) {
   return (
-    <Card className="card-lift rounded-2xl border-brandborder bg-card p-0">
+    <Card className="card-lift border-white/10 bg-card p-0">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-soft text-medblue">{icon}</span>
+          <span className="hex flex h-10 w-10 items-center justify-center bg-gold/10 text-gold">{icon}</span>
           {badge && (
-            <span className="rounded-full bg-teal-soft/60 px-2 py-0.5 text-[11px] font-bold text-teal-800">{badge}</span>
+            <span className="border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gold-text" style={{ borderRadius: 2 }}>
+              {badge}
+            </span>
           )}
         </div>
-        <p className="mt-3 text-3xl font-extrabold tracking-tight text-ink">{value}</p>
-        <p className="mt-0.5 text-sm font-semibold text-inkmuted">{label}</p>
-        {hint && <p className="mt-1 text-xs text-inkmuted">{hint}</p>}
+        <p className="mt-3 font-display text-3xl tracking-tight text-ink">{value}</p>
+        <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ash">{label}</p>
+        {hint && <p className="mt-1 text-xs text-ash">{hint}</p>}
       </CardContent>
     </Card>
   );
@@ -78,9 +80,7 @@ function TrendChart({ trend }: { trend: { date: string; count: number }[] }) {
           return (
             <div key={t.date} className="group relative flex h-full flex-1 flex-col justify-end">
               <div
-                className={`w-full rounded-t-md transition-all group-hover:opacity-80 ${
-                  isToday ? "bg-teal" : "bg-medblue/70"
-                }`}
+                className={`w-full transition-all group-hover:opacity-80 ${isToday ? "bg-gold" : "bg-white/15"}`}
                 style={{ height: `${Math.max(pct, t.count > 0 ? 8 : 3)}%` }}
                 title={`${fmtDate(t.date)} — ${t.count} request${t.count === 1 ? "" : "s"}`}
               />
@@ -88,11 +88,11 @@ function TrendChart({ trend }: { trend: { date: string; count: number }[] }) {
           );
         })}
       </div>
-      <div className="mt-2 flex justify-between text-[10px] font-semibold text-inkmuted">
+      <div className="mt-2 flex justify-between text-[10px] font-semibold uppercase tracking-[0.12em] text-ash">
         <span>{fmtDate(trend[0]?.date)}</span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-2 rounded-full bg-medblue/70" aria-hidden /> last 14 days
-          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-teal" aria-hidden /> today
+          <span className="inline-block h-2 w-2 bg-white/15" aria-hidden /> last 14 days
+          <span className="ml-2 inline-block h-2 w-2 bg-gold" aria-hidden /> today
         </span>
         <span>{fmtDate(trend[trend.length - 1]?.date)}</span>
       </div>
@@ -127,7 +127,7 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
       {stats.isLoading ? (
         <ListSkeleton rows={6} />
       ) : stats.isError || !s ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">
             Could not load dashboard statistics. Please refresh the page.
           </CardContent>
@@ -171,10 +171,10 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
 
           {/* Trend + status breakdown */}
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="rounded-2xl border-brandborder bg-card p-0 lg:col-span-2">
+            <Card className="border-white/10 bg-card p-0 lg:col-span-2">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-extrabold text-ink">
-                  <TrendingUp className="h-4 w-4 text-medblue" aria-hidden />
+                <CardTitle className="flex items-center gap-2 font-display text-base uppercase tracking-wide text-ink">
+                  <TrendingUp className="h-4 w-4 text-gold" aria-hidden />
                   Appointment requests — last 14 days
                 </CardTitle>
               </CardHeader>
@@ -183,9 +183,9 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
               </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border-brandborder bg-card p-0">
+            <Card className="border-white/10 bg-card p-0">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-extrabold text-ink">Requests by status</CardTitle>
+                <CardTitle className="font-display text-base uppercase tracking-wide text-ink">Requests by status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2.5 p-5 pt-0">
                 {["NEW", "CONTACTED", "SCHEDULED", "COMPLETED", "CANCELLED"].map((status) => (
@@ -199,9 +199,9 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
           </div>
 
           {/* Recent requests */}
-          <Card className="rounded-2xl border-brandborder bg-card p-0">
+          <Card className="border-white/10 bg-card p-0">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base font-extrabold text-ink">Latest appointment requests</CardTitle>
+              <CardTitle className="font-display text-base uppercase tracking-wide text-ink">Latest appointment requests</CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-0">
               {recent.isLoading ? (
@@ -211,7 +211,7 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
                   No appointment requests yet — new requests will appear here.
                 </p>
               ) : (
-                <ul className="divide-y divide-brandborder">
+                <ul className="divide-y divide-white/10">
                   {recentAppointments.map((a) => (
                     <li key={a.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3">
                       <div className="min-w-0 flex-1">
@@ -239,27 +239,26 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
               Quick actions
             </p>
             <div className="flex flex-wrap gap-2.5">
-              <Button className="rounded-xl" onClick={() => onNavigate("appointments")}>
+              <Button onClick={() => onNavigate("appointments")}>
                 <ClipboardList className="h-4 w-4" aria-hidden />
                 Review Requests
               </Button>
-              <Button variant="outline" className="rounded-xl" onClick={() => onNavigate("messages")}>
+              <Button variant="outline" onClick={() => onNavigate("messages")}>
                 <MessageSquare className="h-4 w-4" aria-hidden />
                 Open Messages
               </Button>
-              <Button variant="outline" className="rounded-xl" onClick={() => onNavigate("services")}>
+              <Button variant="outline" onClick={() => onNavigate("services")}>
                 <Plus className="h-4 w-4" aria-hidden />
                 Manage Services
               </Button>
               <Button
                 variant="outline"
-                className="rounded-xl"
                 onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}
               >
                 <Download className="h-4 w-4" aria-hidden />
                 Export Requests (CSV)
               </Button>
-              <Button variant="outline" className="rounded-xl" onClick={() => navigate("#/")}>
+              <Button variant="outline" onClick={() => navigate("#/")}>
                 <ExternalLink className="h-4 w-4" aria-hidden />
                 View Site
               </Button>

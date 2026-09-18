@@ -120,7 +120,7 @@ function CategoryDialog({
 
   return (
     <Dialog open={!!openState} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-ink">{editing ? `Edit category — ${editing.name}` : "Add new category"}</DialogTitle>
           <DialogDescription>Categories group services on the public site.</DialogDescription>
@@ -128,10 +128,10 @@ function CategoryDialog({
 
         <div className="space-y-4">
           <AdminField id="cat-name" label="Category name" required error={nameError}>
-            <Input id="cat-name" value={draft.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" placeholder="e.g. Pathology" />
+            <Input id="cat-name" value={draft.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Pathology" />
           </AdminField>
           <AdminField id="cat-slug" label="URL slug" hint="Leave blank to auto-generate from the name.">
-            <Input id="cat-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} className="rounded-xl" placeholder="e.g. pathology" />
+            <Input id="cat-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} placeholder="e.g. pathology" />
           </AdminField>
           <AdminField id="cat-desc" label="Description">
             <textarea
@@ -139,18 +139,18 @@ function CategoryDialog({
               rows={3}
               value={draft.description}
               onChange={(e) => set("description", e.target.value)}
-              className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+              className="flex w-full border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
             />
           </AdminField>
           <div className="grid gap-4 sm:grid-cols-2">
             <AdminField id="cat-icon" label="Icon" hint="Short label, e.g. flask or microscope.">
-              <Input id="cat-icon" value={draft.icon} onChange={(e) => set("icon", e.target.value)} className="rounded-xl" />
+              <Input id="cat-icon" value={draft.icon} onChange={(e) => set("icon", e.target.value)} />
             </AdminField>
             <AdminField id="cat-sort" label="Sort order" hint="Lower numbers appear first.">
-              <Input id="cat-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+              <Input id="cat-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} />
             </AdminField>
           </div>
-          <div className="flex items-start justify-between gap-4 rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+          <div className="flex items-start justify-between gap-4 border border-brandborder bg-soft/50 px-4 py-3">
             <div>
               <label htmlFor="cat-published" className="text-sm font-semibold text-ink">
                 Published
@@ -162,10 +162,10 @@ function CategoryDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
-          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+          <Button onClick={handleSave} disabled={save.isPending}>
             {save.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -237,7 +237,7 @@ export function CategoriesTab() {
         title="Categories"
         description="Service categories shown on the public services page."
         actions={
-          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+          <Button onClick={() => setDialog({ mode: "create" })}>
             <Plus className="h-4 w-4" aria-hidden />
             Add Category
           </Button>
@@ -247,7 +247,7 @@ export function CategoriesTab() {
       {categories.isLoading ? (
         <ListSkeleton rows={4} />
       ) : categories.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">Could not load categories. Please refresh.</CardContent>
         </Card>
       ) : allCategories.length === 0 ? (
@@ -276,7 +276,7 @@ export function CategoriesTab() {
                     <p className="font-bold text-ink">
                       {c.name}
                       {!c.published && (
-                        <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                        <span className="ml-2 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
                           DRAFT
                         </span>
                       )}
@@ -296,7 +296,7 @@ export function CategoriesTab() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label={`Edit ${c.name}`} onClick={() => setDialog({ mode: "edit", category: c })}>
+                      <Button variant="ghost" size="icon" className="text-medblue hover:text-ink" aria-label={`Edit ${c.name}`} onClick={() => setDialog({ mode: "edit", category: c })}>
                         <Pencil className="h-4 w-4" aria-hidden />
                       </Button>
                       <DeleteConfirmDialog
@@ -305,7 +305,7 @@ export function CategoriesTab() {
                         onConfirm={() => remove.mutate(c)}
                         disabled={remove.isPending}
                       >
-                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label={`Delete ${c.name}`} disabled={remove.isPending}>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/5" aria-label={`Delete ${c.name}`} disabled={remove.isPending}>
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </Button>
                       </DeleteConfirmDialog>

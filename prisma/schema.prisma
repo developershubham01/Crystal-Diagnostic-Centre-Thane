@@ -83,6 +83,7 @@ model PackageTest {
 
 model AppointmentRequest {
   id             String   @id @default(cuid())
+  reference      String   @unique // public tracking code, e.g. CDC-7K2M9Q
   name           String
   mobile         String
   email          String?

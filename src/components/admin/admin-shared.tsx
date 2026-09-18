@@ -66,23 +66,24 @@ export function fmtDateTime(iso: string | null | undefined): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* Status badges (NEW=teal, CONTACTED=medblue, SCHEDULED=navy,         */
-/* COMPLETED=green, CANCELLED=red)                                     */
+/* Status badges — Midnight Showroom dark semantics                    */
+/* (NEW=gold, CONTACTED=cyan informational, SCHEDULED=white,           */
+/*  COMPLETED=emerald state, CANCELLED=destructive)                    */
 /* ------------------------------------------------------------------ */
 
 const STATUS_STYLES: Record<string, { badge: string; dot: string }> = {
-  NEW: { badge: "border-teal-soft bg-teal-soft/50 text-teal-800", dot: "bg-teal" },
-  CONTACTED: { badge: "border-cyan-200 bg-cyan-50 text-cyan-800", dot: "bg-cyan-600" },
-  SCHEDULED: { badge: "border-[#0b3b66]/25 bg-[#0b3b66]/[0.07] text-[#0b3b66]", dot: "bg-navy" },
-  COMPLETED: { badge: "border-emerald-200 bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
-  CANCELLED: { badge: "border-red-200 bg-red-50 text-red-700", dot: "bg-red-500" },
+  NEW: { badge: "border-gold/40 bg-gold/10 text-gold-text", dot: "bg-gold" },
+  CONTACTED: { badge: "border-cyan-pulse/40 bg-cyan-pulse/10 text-cyan-pulse", dot: "bg-cyan-pulse" },
+  SCHEDULED: { badge: "border-white/30 bg-white/10 text-ink", dot: "bg-ink" },
+  COMPLETED: { badge: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300", dot: "bg-emerald-400" },
+  CANCELLED: { badge: "border-destructive/40 bg-destructive/10 text-destructive", dot: "bg-destructive" },
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status] ?? { badge: "border-brandborder bg-soft text-inkmuted", dot: "bg-inkmuted" };
+  const style = STATUS_STYLES[status] ?? { badge: "border-white/20 bg-white/5 text-ash", dot: "bg-ash" };
   return (
-    <Badge variant="outline" className={cn("gap-1.5 font-bold", style.badge)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} aria-hidden />
+    <Badge variant="outline" className={cn("gap-1.5 font-bold uppercase tracking-wider", style.badge)}>
+      <span className={cn("h-1.5 w-1.5", style.dot)} aria-hidden />
       {status}
     </Badge>
   );
@@ -104,8 +105,8 @@ export function TabHeader({
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 className="text-xl font-extrabold tracking-tight text-ink">{title}</h2>
-        {description && <p className="mt-1 max-w-2xl text-sm text-inkmuted">{description}</p>}
+        <h2 className="font-display text-xl uppercase tracking-tight text-ink">{title}</h2>
+        {description && <p className="mt-1 max-w-2xl text-sm text-ash">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
@@ -116,7 +117,7 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-2" role="status" aria-label="Loading">
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-12 w-full rounded-xl" />
+        <Skeleton key={i} className="h-12 w-full" />
       ))}
     </div>
   );
@@ -124,10 +125,10 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
 
 export function EmptyState({ icon, title, hint }: { icon: ReactNode; title: string; hint?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-brandborder bg-card/60 px-6 py-12 text-center">
-      <span className="text-inkmuted">{icon}</span>
-      <p className="text-sm font-bold text-ink">{title}</p>
-      {hint && <p className="max-w-sm text-xs leading-relaxed text-inkmuted">{hint}</p>}
+    <div className="flex flex-col items-center justify-center gap-2 border border-dashed border-white/15 bg-white/[0.03] px-6 py-12 text-center">
+      <span className="text-ash">{icon}</span>
+      <p className="font-display text-sm uppercase tracking-wide text-ink">{title}</p>
+      {hint && <p className="max-w-sm text-xs leading-relaxed text-ash">{hint}</p>}
     </div>
   );
 }
@@ -135,7 +136,7 @@ export function EmptyState({ icon, title, hint }: { icon: ReactNode; title: stri
 /** Wraps a shadcn table for safe horizontal scrolling on small screens. */
 export function ResponsiveTableWrap({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-brandborder bg-card">
+    <div className="overflow-hidden border border-white/10 bg-card">
       <div className="overflow-x-auto">
         {children}
       </div>
@@ -194,12 +195,12 @@ export function SwitchRow({
   note?: string;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+    <div className="flex items-start justify-between gap-4 border border-white/10 bg-white/[0.03] px-4 py-3">
       <div>
         <Label htmlFor={id} className="cursor-pointer">
           {label}
         </Label>
-        {note && <p className="mt-0.5 text-xs text-inkmuted">{note}</p>}
+        {note && <p className="mt-0.5 text-xs text-ash">{note}</p>}
       </div>
       <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
     </div>

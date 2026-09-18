@@ -92,13 +92,13 @@ function TestsEditor({ tests, onChange }: { tests: string[]; onChange: (tests: s
               onChange={(e) => onChange(tests.map((t, j) => (j === i ? e.target.value : t)))}
               placeholder={`Test ${i + 1}`}
               aria-label={`Test ${i + 1}`}
-              className="rounded-xl"
+             
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="shrink-0 rounded-xl text-inkmuted hover:text-destructive"
+              className="shrink-0 text-inkmuted hover:text-destructive"
               aria-label={`Remove test ${i + 1}`}
               disabled={tests.length === 1}
               onClick={() => onChange(tests.filter((_, j) => j !== i))}
@@ -108,7 +108,7 @@ function TestsEditor({ tests, onChange }: { tests: string[]; onChange: (tests: s
           </li>
         ))}
       </ul>
-      <Button type="button" variant="outline" size="sm" className="mt-2 rounded-xl" onClick={() => onChange([...tests, ""])}>
+      <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => onChange([...tests, ""])}>
         <Plus className="h-4 w-4" aria-hidden />
         Add test
       </Button>
@@ -190,7 +190,7 @@ function PackageDialog({
 
   return (
     <Dialog open={!!openState} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-ink">{editing ? `Edit package — ${editing.name}` : "Add new health package"}</DialogTitle>
           <DialogDescription>Health packages group multiple tests at a package price.</DialogDescription>
@@ -199,15 +199,15 @@ function PackageDialog({
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <AdminField id="pkg-name" label="Package name" required error={fieldErrors.name}>
-              <Input id="pkg-name" value={draft.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" placeholder="e.g. Full Body Checkup" />
+              <Input id="pkg-name" value={draft.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Full Body Checkup" />
             </AdminField>
             <AdminField id="pkg-slug" label="URL slug" hint="Leave blank to auto-generate.">
-              <Input id="pkg-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} className="rounded-xl" />
+              <Input id="pkg-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} />
             </AdminField>
           </div>
 
           <AdminField id="pkg-desc" label="Short description" hint="Shown on package cards.">
-            <Input id="pkg-desc" value={draft.description} onChange={(e) => set("description", e.target.value)} className="rounded-xl" />
+            <Input id="pkg-desc" value={draft.description} onChange={(e) => set("description", e.target.value)} />
           </AdminField>
 
           <AdminField id="pkg-detail" label="Detailed description">
@@ -216,7 +216,7 @@ function PackageDialog({
               rows={3}
               value={draft.detailedDescription}
               onChange={(e) => set("detailedDescription", e.target.value)}
-              className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+              className="flex w-full border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
             />
           </AdminField>
 
@@ -224,23 +224,23 @@ function PackageDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <AdminField id="pkg-prep" label="Preparation">
-              <Input id="pkg-prep" value={draft.preparation} onChange={(e) => set("preparation", e.target.value)} className="rounded-xl" placeholder="e.g. Fasting 10–12 hrs" />
+              <Input id="pkg-prep" value={draft.preparation} onChange={(e) => set("preparation", e.target.value)} placeholder="e.g. Fasting 10–12 hrs" />
             </AdminField>
             <AdminField id="pkg-appl" label="Applicability" hint="e.g. Adults 18+, both genders.">
-              <Input id="pkg-appl" value={draft.applicability} onChange={(e) => set("applicability", e.target.value)} className="rounded-xl" />
+              <Input id="pkg-appl" value={draft.applicability} onChange={(e) => set("applicability", e.target.value)} />
             </AdminField>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <AdminField id="pkg-price" label="Price (₹)" error={fieldErrors.price}>
-              <Input id="pkg-price" type="number" min="0" inputMode="decimal" value={draft.price} onChange={(e) => set("price", e.target.value)} className="rounded-xl" />
+              <Input id="pkg-price" type="number" min="0" inputMode="decimal" value={draft.price} onChange={(e) => set("price", e.target.value)} />
             </AdminField>
             <AdminField id="pkg-sort" label="Sort order">
-              <Input id="pkg-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+              <Input id="pkg-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} />
             </AdminField>
           </div>
 
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="border border-amber-200 bg-amber-50 px-4 py-3">
             <label htmlFor="pkg-pricevisible" className="flex cursor-pointer items-start justify-between gap-3">
               <span className="text-sm font-semibold text-amber-900">
                 Show price publicly
@@ -259,10 +259,10 @@ function PackageDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
-          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+          <Button onClick={handleSave} disabled={save.isPending}>
             {save.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -338,7 +338,7 @@ export function PackagesTab() {
         title="Health Packages"
         description="Preventive packages combining multiple tests. Package contents are sample data until confirmed by the centre."
         actions={
-          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+          <Button onClick={() => setDialog({ mode: "create" })}>
             <Plus className="h-4 w-4" aria-hidden />
             Add Package
           </Button>
@@ -352,7 +352,7 @@ export function PackagesTab() {
           placeholder="Search packages…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-xl pl-9"
+          className="pl-9"
           aria-label="Search packages"
         />
       </div>
@@ -360,7 +360,7 @@ export function PackagesTab() {
       {list.isLoading ? (
         <ListSkeleton rows={5} />
       ) : list.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">Could not load packages. Please refresh.</CardContent>
         </Card>
       ) : packages.length === 0 ? (
@@ -404,7 +404,7 @@ export function PackagesTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`rounded-xl ${p.featured ? "text-amber-500" : "text-inkmuted hover:text-amber-500"}`}
+                      className={`${p.featured ? "text-amber-500" : "text-inkmuted hover:text-amber-500"}`}
                       aria-label={p.featured ? `Remove ${p.name} from featured` : `Mark ${p.name} as featured`}
                       disabled={toggle.isPending}
                       onClick={() => toggle.mutate({ pkg: p, patch: { featured: !p.featured } })}
@@ -422,7 +422,7 @@ export function PackagesTab() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label={`Edit ${p.name}`} onClick={() => setDialog({ mode: "edit", pkg: p })}>
+                      <Button variant="ghost" size="icon" className="text-medblue hover:text-ink" aria-label={`Edit ${p.name}`} onClick={() => setDialog({ mode: "edit", pkg: p })}>
                         <Pencil className="h-4 w-4" aria-hidden />
                       </Button>
                       <DeleteConfirmDialog
@@ -431,7 +431,7 @@ export function PackagesTab() {
                         onConfirm={() => remove.mutate(p)}
                         disabled={remove.isPending}
                       >
-                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label={`Delete ${p.name}`} disabled={remove.isPending}>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/5" aria-label={`Delete ${p.name}`} disabled={remove.isPending}>
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </Button>
                       </DeleteConfirmDialog>

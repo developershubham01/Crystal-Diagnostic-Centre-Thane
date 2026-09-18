@@ -15,7 +15,7 @@ export function GalleryPage() {
   const { data: images, isLoading, isError, refetch } = useGallery();
   usePageMeta(
     "Gallery",
-    "A look inside Crystal Diagnostic Centre, Thane West. Images shown are representative until photographs are published by the centre.",
+    "A look inside Crystal Diagnostic Centre, Thane West — featuring real photographs of our reception, imaging rooms and frontage.",
     "/gallery"
   );
 
@@ -51,7 +51,7 @@ export function GalleryPage() {
       <PageHero
         eyebrow="Gallery"
         title="A Look Inside the Centre"
-        description="A look inside Crystal Diagnostic Centre. Images shown are representative until photographs are published by the centre."
+        description="A look inside Crystal Diagnostic Centre. Includes real photographs of the centre alongside illustrative visuals."
       />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
@@ -118,7 +118,7 @@ export function GalleryPage() {
 
         <p className="mx-auto mt-8 flex max-w-2xl items-start gap-2.5 border-l-2 border-gold/50 bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-inkmuted">
           <Camera className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-          All images are representative placeholders until actual photographs of the centre are published.
+          Photographs of the reception, X-ray and sonography rooms and the centre frontage are actual photos of Crystal Diagnostic Centre; any remaining illustrative visuals are placeholders.
         </p>
       </div>
 

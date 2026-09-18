@@ -9,6 +9,7 @@ import { ServiceDetailPage } from "@/components/pages/ServiceDetailPage";
 import { PackagesPage } from "@/components/pages/PackagesPage";
 import { PackageDetailPage } from "@/components/pages/PackageDetailPage";
 import { BookTestPage } from "@/components/pages/BookTestPage";
+import { TrackPage } from "@/components/pages/TrackPage";
 import { ReportsPage } from "@/components/pages/ReportsPage";
 import { ContactPage } from "@/components/pages/ContactPage";
 import { GalleryPage } from "@/components/pages/GalleryPage";
@@ -31,6 +32,7 @@ const Lazy = {
   PackagesPage: lazy(() => import("@/components/pages/PackagesPage").then((m) => ({ default: m.PackagesPage }))),
   PackageDetailPage: lazy(() => import("@/components/pages/PackageDetailPage").then((m) => ({ default: m.PackageDetailPage }))),
   BookTestPage: lazy(() => import("@/components/pages/BookTestPage").then((m) => ({ default: m.BookTestPage }))),
+  TrackPage: lazy(() => import("@/components/pages/TrackPage").then((m) => ({ default: m.TrackPage }))),
   ReportsPage: lazy(() => import("@/components/pages/ReportsPage").then((m) => ({ default: m.ReportsPage }))),
   ContactPage: lazy(() => import("@/components/pages/ContactPage").then((m) => ({ default: m.ContactPage }))),
   GalleryPage: lazy(() => import("@/components/pages/GalleryPage").then((m) => ({ default: m.GalleryPage }))),
@@ -76,6 +78,8 @@ export function RouteRenderer() {
         return <Lazy.PackageDetailPage slug={route.slug} />;
       case "book-test":
         return <Lazy.BookTestPage />;
+      case "track":
+        return <Lazy.TrackPage />;
       case "reports":
         return <Lazy.ReportsPage />;
       case "contact":

@@ -172,7 +172,7 @@ function ServiceDialog({
 
   return (
     <Dialog open={!!openState} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-ink">{editing ? `Edit service — ${editing.name}` : "Add new service"}</DialogTitle>
           <DialogDescription>
@@ -182,16 +182,16 @@ function ServiceDialog({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <AdminField id="svc-name" label="Service name" required error={fieldErrors.name}>
-            <Input id="svc-name" value={draft.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" />
+            <Input id="svc-name" value={draft.name} onChange={(e) => set("name", e.target.value)} />
           </AdminField>
           <AdminField id="svc-slug" label="URL slug" hint="Leave blank to auto-generate from the name.">
-            <Input id="svc-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} className="rounded-xl" placeholder="e.g. complete-blood-count" />
+            <Input id="svc-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} placeholder="e.g. complete-blood-count" />
           </AdminField>
         </div>
 
         <AdminField id="svc-category" label="Category" required error={fieldErrors.categoryId}>
           <Select value={draft.categoryId} onValueChange={(v) => set("categoryId", v)}>
-            <SelectTrigger id="svc-category" className="w-full rounded-xl">
+            <SelectTrigger id="svc-category" className="w-full">
               <SelectValue placeholder="Choose a category" />
             </SelectTrigger>
             <SelectContent>
@@ -205,7 +205,7 @@ function ServiceDialog({
         </AdminField>
 
         <AdminField id="svc-short" label="Short description" hint="One line shown on cards and lists.">
-          <Input id="svc-short" value={draft.shortDescription} onChange={(e) => set("shortDescription", e.target.value)} className="rounded-xl" />
+          <Input id="svc-short" value={draft.shortDescription} onChange={(e) => set("shortDescription", e.target.value)} />
         </AdminField>
 
         <AdminField id="svc-detail" label="Detailed description">
@@ -214,28 +214,28 @@ function ServiceDialog({
             rows={3}
             value={draft.detailedDescription}
             onChange={(e) => set("detailedDescription", e.target.value)}
-            className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+            className="flex w-full border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
           />
         </AdminField>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <AdminField id="svc-prep" label="Preparation">
-            <Input id="svc-prep" value={draft.preparation} onChange={(e) => set("preparation", e.target.value)} className="rounded-xl" placeholder="e.g. Fasting 8–10 hrs" />
+            <Input id="svc-prep" value={draft.preparation} onChange={(e) => set("preparation", e.target.value)} placeholder="e.g. Fasting 8–10 hrs" />
           </AdminField>
           <AdminField id="svc-sample" label="Sample type">
-            <Input id="svc-sample" value={draft.sampleType} onChange={(e) => set("sampleType", e.target.value)} className="rounded-xl" placeholder="e.g. Blood" />
+            <Input id="svc-sample" value={draft.sampleType} onChange={(e) => set("sampleType", e.target.value)} placeholder="e.g. Blood" />
           </AdminField>
           <AdminField id="svc-tat" label="Report turnaround">
-            <Input id="svc-tat" value={draft.turnaroundTime} onChange={(e) => set("turnaroundTime", e.target.value)} className="rounded-xl" placeholder="e.g. Same day" />
+            <Input id="svc-tat" value={draft.turnaroundTime} onChange={(e) => set("turnaroundTime", e.target.value)} placeholder="e.g. Same day" />
           </AdminField>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <AdminField id="svc-price" label="Price (₹)" error={fieldErrors.price} hint="Stored internally — only shown publicly when the switch below is on.">
-            <Input id="svc-price" type="number" min="0" inputMode="decimal" value={draft.price} onChange={(e) => set("price", e.target.value)} className="rounded-xl" />
+            <Input id="svc-price" type="number" min="0" inputMode="decimal" value={draft.price} onChange={(e) => set("price", e.target.value)} />
           </AdminField>
           <div className="flex items-end">
-            <div className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <div className="w-full border border-amber-200 bg-amber-50 px-4 py-3">
               <label htmlFor="svc-pricevisible" className="flex cursor-pointer items-start justify-between gap-3">
                 <span className="text-sm font-semibold text-amber-900">
                   Show price publicly
@@ -254,11 +254,11 @@ function ServiceDialog({
           <SwitchRow id="svc-published" label="Published" note="Visible on the public site." checked={draft.published} onCheckedChange={(v) => set("published", v)} />
         </div>
 
-        <details className="rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+        <details className="border border-brandborder bg-soft/50 px-4 py-3">
           <summary className="cursor-pointer text-sm font-bold text-ink">SEO fields (optional)</summary>
           <div className="mt-3 space-y-4">
             <AdminField id="svc-seotitle" label="SEO title">
-              <Input id="svc-seotitle" value={draft.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} className="rounded-xl" />
+              <Input id="svc-seotitle" value={draft.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} />
             </AdminField>
             <AdminField id="svc-seodesc" label="SEO description">
               <textarea
@@ -266,17 +266,17 @@ function ServiceDialog({
                 rows={2}
                 value={draft.seoDescription}
                 onChange={(e) => set("seoDescription", e.target.value)}
-                className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+                className="flex w-full border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
               />
             </AdminField>
           </div>
         </details>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
-          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+          <Button onClick={handleSave} disabled={save.isPending}>
             {save.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -355,7 +355,7 @@ export function ServicesTab() {
         title="Services"
         description="Diagnostic tests offered by the centre. Unpublished services stay hidden from the public site."
         actions={
-          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+          <Button onClick={() => setDialog({ mode: "create" })}>
             <Plus className="h-4 w-4" aria-hidden />
             Add Service
           </Button>
@@ -369,7 +369,7 @@ export function ServicesTab() {
           placeholder="Search services…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-xl pl-9"
+          className="pl-9"
           aria-label="Search services"
         />
       </div>
@@ -377,7 +377,7 @@ export function ServicesTab() {
       {list.isLoading ? (
         <ListSkeleton rows={6} />
       ) : list.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">Could not load services. Please refresh.</CardContent>
         </Card>
       ) : services.length === 0 ? (
@@ -421,7 +421,7 @@ export function ServicesTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={cn("rounded-xl", s.featured ? "text-amber-500" : "text-inkmuted hover:text-amber-500")}
+                      className={cn(s.featured ? "text-amber-500" : "text-inkmuted hover:text-amber-500")}
                       aria-label={s.featured ? `Remove ${s.name} from featured` : `Mark ${s.name} as featured`}
                       title={s.featured ? "Featured — click to unmark" : "Mark as featured"}
                       disabled={toggle.isPending}
@@ -440,7 +440,7 @@ export function ServicesTab() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label={`Edit ${s.name}`} onClick={() => setDialog({ mode: "edit", service: s })}>
+                      <Button variant="ghost" size="icon" className="text-medblue hover:text-ink" aria-label={`Edit ${s.name}`} onClick={() => setDialog({ mode: "edit", service: s })}>
                         <Pencil className="h-4 w-4" aria-hidden />
                       </Button>
                       <DeleteConfirmDialog
@@ -449,7 +449,7 @@ export function ServicesTab() {
                         onConfirm={() => remove.mutate(s)}
                         disabled={remove.isPending}
                       >
-                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label={`Delete ${s.name}`} disabled={remove.isPending}>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/5" aria-label={`Delete ${s.name}`} disabled={remove.isPending}>
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </Button>
                       </DeleteConfirmDialog>

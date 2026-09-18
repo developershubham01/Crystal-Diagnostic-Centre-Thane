@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { OpenNowBadge } from "@/components/site/OpenNowBadge";
 import {
   Select,
   SelectContent,
@@ -425,8 +426,11 @@ export function ContactPage() {
                 <Card className="border-white/10 p-0">
                   <CardContent className="flex items-start gap-3 p-5">
                     <Clock className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden />
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">Working Hours</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">Working Hours</p>
+                        <OpenNowBadge />
+                      </div>
                       <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-ink">
                         {settings.workingHours}
                       </p>

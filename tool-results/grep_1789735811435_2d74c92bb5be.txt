@@ -1,0 +1,187 @@
+/home/z/my-project/src/components/admin/GalleryTab.tsx:169:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-lg">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:179:          <div className="rounded-xl border border-dashed border-brandborder bg-soft/50 p-4">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:181:              <UploadCloud className="h-4 w-4 text-medblue" aria-hidden />
+/home/z/my-project/src/components/admin/GalleryTab.tsx:189:              className="mt-1.5 cursor-pointer rounded-xl"
+/home/z/my-project/src/components/admin/GalleryTab.tsx:199:              <span className="h-px flex-1 bg-brandborder" />
+/home/z/my-project/src/components/admin/GalleryTab.tsx:201:              <span className="h-px flex-1 bg-brandborder" />
+/home/z/my-project/src/components/admin/GalleryTab.tsx:211:                className="rounded-xl pl-9"
+/home/z/my-project/src/components/admin/GalleryTab.tsx:216:              <div className="mt-3 overflow-hidden rounded-xl border border-brandborder bg-card">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:231:            <Input id="gallery-title" value={draft.title} onChange={(e) => set("title", e.target.value)} className="rounded-xl" placeholder="e.g. Reception area" />
+/home/z/my-project/src/components/admin/GalleryTab.tsx:237:                <SelectTrigger id="gallery-category" className="w-full rounded-xl">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:250:              <Input id="gallery-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/GalleryTab.tsx:255:            <Input id="gallery-alt" value={draft.alt} onChange={(e) => set("alt", e.target.value)} className="rounded-xl" placeholder="e.g. Clean reception desk with seating area" />
+/home/z/my-project/src/components/admin/GalleryTab.tsx:262:          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/GalleryTab.tsx:265:          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending || uploading}>
+/home/z/my-project/src/components/admin/GalleryTab.tsx:331:            className="rounded-xl"
+/home/z/my-project/src/components/admin/GalleryTab.tsx:346:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:359:              <Card className={`h-full rounded-2xl border-brandborder p-0 ${img.published ? "" : "opacity-80"}`}>
+/home/z/my-project/src/components/admin/GalleryTab.tsx:360:                <div className="relative overflow-hidden rounded-t-2xl bg-soft">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:369:                    <span className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
+/home/z/my-project/src/components/admin/GalleryTab.tsx:391:                      className="rounded-xl text-medblue hover:text-ink"
+/home/z/my-project/src/components/admin/GalleryTab.tsx:406:                      <Button variant="ghost" size="sm" className="rounded-xl text-destructive hover:bg-destructive/5" disabled={remove.isPending}>
+/home/z/my-project/src/components/admin/ServicesTab.tsx:175:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:185:            <Input id="svc-name" value={draft.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:188:            <Input id="svc-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} className="rounded-xl" placeholder="e.g. complete-blood-count" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:194:            <SelectTrigger id="svc-category" className="w-full rounded-xl">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:208:          <Input id="svc-short" value={draft.shortDescription} onChange={(e) => set("shortDescription", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:217:            className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+/home/z/my-project/src/components/admin/ServicesTab.tsx:223:            <Input id="svc-prep" value={draft.preparation} onChange={(e) => set("preparation", e.target.value)} className="rounded-xl" placeholder="e.g. Fasting 8–10 hrs" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:226:            <Input id="svc-sample" value={draft.sampleType} onChange={(e) => set("sampleType", e.target.value)} className="rounded-xl" placeholder="e.g. Blood" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:229:            <Input id="svc-tat" value={draft.turnaroundTime} onChange={(e) => set("turnaroundTime", e.target.value)} className="rounded-xl" placeholder="e.g. Same day" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:235:            <Input id="svc-price" type="number" min="0" inputMode="decimal" value={draft.price} onChange={(e) => set("price", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:238:            <div className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:257:        <details className="rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:261:              <Input id="svc-seotitle" value={draft.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/ServicesTab.tsx:269:                className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+/home/z/my-project/src/components/admin/ServicesTab.tsx:276:          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/ServicesTab.tsx:279:          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/ServicesTab.tsx:358:          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+/home/z/my-project/src/components/admin/ServicesTab.tsx:372:          className="rounded-xl pl-9"
+/home/z/my-project/src/components/admin/ServicesTab.tsx:380:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:393:              <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:404:                <tr key={s.id} className="border-b border-brandborder/70 transition-colors last:border-0 hover:bg-soft/60">
+/home/z/my-project/src/components/admin/ServicesTab.tsx:416:                        <span className="ml-1 text-[10px] font-bold text-teal-800">{s.priceVisible ? "PUBLIC" : "INTERNAL"}</span>
+/home/z/my-project/src/components/admin/ServicesTab.tsx:424:                      className={cn("rounded-xl", s.featured ? "text-amber-500" : "text-inkmuted hover:text-amber-500")}
+/home/z/my-project/src/components/admin/ServicesTab.tsx:443:                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label={`Edit ${s.name}`} onClick={() => setDialog({ mode: "edit", service: s })}>
+/home/z/my-project/src/components/admin/ServicesTab.tsx:452:                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label={`Delete ${s.name}`} disabled={remove.isPending}>
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:66:      {icon && <span className="mt-0.5 text-medblue">{icon}</span>}
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:141:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:160:                  <a href={`tel:+91${appointment.mobile}`} className="font-bold text-medblue hover:underline">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:172:                value={<Badge variant="outline" className="border-brandborder font-semibold text-ink">{appointment.testOrPackage}</Badge>}
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:189:                    <span className="font-bold text-teal-800">Requested</span>
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:197:                value={appointment.consent ? <span className="font-bold text-emerald-700">Yes</span> : <span className="font-bold text-red-700">No</span>}
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:203:                <Separator className="bg-brandborder" />
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:206:                  <p className="mt-1 whitespace-pre-line rounded-xl bg-soft/70 p-3 text-sm leading-relaxed text-ink">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:213:            <Separator className="bg-brandborder" />
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:225:                  <SelectTrigger id="appointment-status" className="mt-1.5 w-full rounded-xl sm:w-64">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:240:                  <StickyNote className="h-3.5 w-3.5 text-medblue" aria-hidden />
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:249:                  className="mt-1.5 rounded-xl"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:255:                    className="rounded-xl"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:270:                      className="rounded-xl text-destructive hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:345:          <Button variant="outline" className="rounded-xl" onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}>
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:353:      <div className="mb-4 grid gap-3 rounded-2xl border border-brandborder bg-card p-4 sm:grid-cols-2 lg:grid-cols-5">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:361:            className="rounded-xl pl-9"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:366:          <SelectTrigger className="w-full rounded-xl" aria-label="Filter by status">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:384:          className="rounded-xl"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:393:            className="rounded-xl"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:399:              className="shrink-0 rounded-xl"
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:413:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:438:                <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:452:                    className={`cursor-pointer border-b border-brandborder/70 transition-colors last:border-0 hover:bg-soft/70 ${
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:453:                      a.status === "NEW" ? "bg-teal-soft/20" : ""
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:483:            <ul className="divide-y divide-brandborder md:hidden">
+/home/z/my-project/src/components/admin/AppointmentsTab.tsx:489:                      a.status === "NEW" ? "bg-teal-soft/20" : ""
+/home/z/my-project/src/components/admin/MessagesTab.tsx:108:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-xl">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:129:                  <a href={`tel:+91${message.phone}`} className="text-sm font-bold text-medblue hover:underline">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:138:                    <a href={`mailto:${message.email}`} className="text-sm font-semibold text-medblue hover:underline">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:148:                    <Badge variant="outline" className="border-brandborder font-semibold text-ink">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:155:              <Separator className="bg-brandborder" />
+/home/z/my-project/src/components/admin/MessagesTab.tsx:159:                <p className="mt-1 whitespace-pre-line rounded-xl bg-soft/70 p-3 text-sm leading-relaxed text-ink">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:164:              <Separator className="bg-brandborder" />
+/home/z/my-project/src/components/admin/MessagesTab.tsx:175:                  <SelectTrigger id="message-status" className="mt-1.5 w-full rounded-xl sm:w-64">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:190:                  <StickyNote className="h-3.5 w-3.5 text-medblue" aria-hidden />
+/home/z/my-project/src/components/admin/MessagesTab.tsx:199:                  className="mt-1.5 rounded-xl"
+/home/z/my-project/src/components/admin/MessagesTab.tsx:205:                    className="rounded-xl"
+/home/z/my-project/src/components/admin/MessagesTab.tsx:220:                      className="rounded-xl text-destructive hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
+/home/z/my-project/src/components/admin/MessagesTab.tsx:296:          <Button variant="outline" className="rounded-xl" onClick={() => window.open("/api/admin/export?type=messages", "_blank")}>
+/home/z/my-project/src/components/admin/MessagesTab.tsx:304:      <div className="mb-4 grid gap-3 rounded-2xl border border-brandborder bg-card p-4 sm:grid-cols-2">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:312:            className="rounded-xl pl-9"
+/home/z/my-project/src/components/admin/MessagesTab.tsx:318:            <SelectTrigger className="w-full rounded-xl" aria-label="Filter by status">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:334:              className="shrink-0 rounded-xl"
+/home/z/my-project/src/components/admin/MessagesTab.tsx:351:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:375:                <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:389:                    className={`cursor-pointer border-b border-brandborder/70 transition-colors last:border-0 hover:bg-soft/70 ${
+/home/z/my-project/src/components/admin/MessagesTab.tsx:390:                      m.status === "NEW" ? "bg-teal-soft/20" : ""
+/home/z/my-project/src/components/admin/MessagesTab.tsx:411:            <ul className="divide-y divide-brandborder md:hidden">
+/home/z/my-project/src/components/admin/MessagesTab.tsx:417:                      m.status === "NEW" ? "bg-teal-soft/20" : ""
+/home/z/my-project/src/components/admin/PackagesTab.tsx:95:              className="rounded-xl"
+/home/z/my-project/src/components/admin/PackagesTab.tsx:101:              className="shrink-0 rounded-xl text-inkmuted hover:text-destructive"
+/home/z/my-project/src/components/admin/PackagesTab.tsx:111:      <Button type="button" variant="outline" size="sm" className="mt-2 rounded-xl" onClick={() => onChange([...tests, ""])}>
+/home/z/my-project/src/components/admin/PackagesTab.tsx:193:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
+/home/z/my-project/src/components/admin/PackagesTab.tsx:202:              <Input id="pkg-name" value={draft.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" placeholder="e.g. Full Body Checkup" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:205:              <Input id="pkg-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:210:            <Input id="pkg-desc" value={draft.description} onChange={(e) => set("description", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:219:              className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+/home/z/my-project/src/components/admin/PackagesTab.tsx:227:              <Input id="pkg-prep" value={draft.preparation} onChange={(e) => set("preparation", e.target.value)} className="rounded-xl" placeholder="e.g. Fasting 10–12 hrs" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:230:              <Input id="pkg-appl" value={draft.applicability} onChange={(e) => set("applicability", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:236:              <Input id="pkg-price" type="number" min="0" inputMode="decimal" value={draft.price} onChange={(e) => set("price", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:239:              <Input id="pkg-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/PackagesTab.tsx:243:          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+/home/z/my-project/src/components/admin/PackagesTab.tsx:262:          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/PackagesTab.tsx:265:          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/PackagesTab.tsx:341:          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+/home/z/my-project/src/components/admin/PackagesTab.tsx:355:          className="rounded-xl pl-9"
+/home/z/my-project/src/components/admin/PackagesTab.tsx:363:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/PackagesTab.tsx:376:              <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
+/home/z/my-project/src/components/admin/PackagesTab.tsx:387:                <tr key={p.id} className="border-b border-brandborder/70 transition-colors last:border-0 hover:bg-soft/60">
+/home/z/my-project/src/components/admin/PackagesTab.tsx:399:                        <span className="ml-1 text-[10px] font-bold text-teal-800">{p.priceVisible ? "PUBLIC" : "INTERNAL"}</span>
+/home/z/my-project/src/components/admin/PackagesTab.tsx:407:                      className={`rounded-xl ${p.featured ? "text-amber-500" : "text-inkmuted hover:text-amber-500"}`}
+/home/z/my-project/src/components/admin/PackagesTab.tsx:425:                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label={`Edit ${p.name}`} onClick={() => setDialog({ mode: "edit", pkg: p })}>
+/home/z/my-project/src/components/admin/PackagesTab.tsx:434:                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label={`Delete ${p.name}`} disabled={remove.isPending}>
+/home/z/my-project/src/components/admin/AdminLayout.tsx:114:        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-brandborder bg-card lg:flex">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:115:          <div className="border-b border-brandborder px-5 py-4">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:119:          <div className="border-t border-brandborder p-4">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:129:          <header className="glass-card sticky top-0 z-40 border-b border-brandborder">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:138:                  <SheetHeader className="border-b border-brandborder p-4 text-left">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:146:                  <div className="border-t border-brandborder p-3">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:166:                <span className="hidden rounded-full border border-brandborder bg-soft px-3 py-1 text-xs font-bold text-ink md:inline">
+/home/z/my-project/src/components/admin/AdminLayout.tsx:170:                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => navigate("#/")}>
+/home/z/my-project/src/components/admin/OverviewTab.tsx:54:    <Card className="card-lift rounded-2xl border-brandborder bg-card p-0">
+/home/z/my-project/src/components/admin/OverviewTab.tsx:57:          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-soft text-medblue">{icon}</span>
+/home/z/my-project/src/components/admin/OverviewTab.tsx:59:            <span className="rounded-full bg-teal-soft/60 px-2 py-0.5 text-[11px] font-bold text-teal-800">{badge}</span>
+/home/z/my-project/src/components/admin/OverviewTab.tsx:81:                className={`w-full rounded-t-md transition-all group-hover:opacity-80 ${
+/home/z/my-project/src/components/admin/OverviewTab.tsx:82:                  isToday ? "bg-teal" : "bg-medblue/70"
+/home/z/my-project/src/components/admin/OverviewTab.tsx:94:          <span className="inline-block h-2 w-2 rounded-full bg-medblue/70" aria-hidden /> last 14 days
+/home/z/my-project/src/components/admin/OverviewTab.tsx:95:          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-teal" aria-hidden /> today
+/home/z/my-project/src/components/admin/OverviewTab.tsx:130:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/OverviewTab.tsx:174:            <Card className="rounded-2xl border-brandborder bg-card p-0 lg:col-span-2">
+/home/z/my-project/src/components/admin/OverviewTab.tsx:177:                  <TrendingUp className="h-4 w-4 text-medblue" aria-hidden />
+/home/z/my-project/src/components/admin/OverviewTab.tsx:186:            <Card className="rounded-2xl border-brandborder bg-card p-0">
+/home/z/my-project/src/components/admin/OverviewTab.tsx:202:          <Card className="rounded-2xl border-brandborder bg-card p-0">
+/home/z/my-project/src/components/admin/OverviewTab.tsx:214:                <ul className="divide-y divide-brandborder">
+/home/z/my-project/src/components/admin/OverviewTab.tsx:242:              <Button className="rounded-xl" onClick={() => onNavigate("appointments")}>
+/home/z/my-project/src/components/admin/OverviewTab.tsx:246:              <Button variant="outline" className="rounded-xl" onClick={() => onNavigate("messages")}>
+/home/z/my-project/src/components/admin/OverviewTab.tsx:250:              <Button variant="outline" className="rounded-xl" onClick={() => onNavigate("services")}>
+/home/z/my-project/src/components/admin/OverviewTab.tsx:256:                className="rounded-xl"
+/home/z/my-project/src/components/admin/OverviewTab.tsx:262:              <Button variant="outline" className="rounded-xl" onClick={() => navigate("#/")}>
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:123:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-lg">
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:131:            <Input id="cat-name" value={draft.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" placeholder="e.g. Pathology" />
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:134:            <Input id="cat-slug" value={draft.slug} onChange={(e) => set("slug", e.target.value)} className="rounded-xl" placeholder="e.g. pathology" />
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:142:              className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:147:              <Input id="cat-icon" value={draft.icon} onChange={(e) => set("icon", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:150:              <Input id="cat-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:153:          <div className="flex items-start justify-between gap-4 rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:165:          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:168:          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:240:          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:250:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:263:              <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:274:                <tr key={c.id} className="border-b border-brandborder/70 transition-colors last:border-0 hover:bg-soft/60">
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:279:                        <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:299:                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label={`Edit ${c.name}`} onClick={() => setDialog({ mode: "edit", category: c })}>
+/home/z/my-project/src/components/admin/CategoriesTab.tsx:308:                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label={`Delete ${c.name}`} disabled={remove.isPending}>
+/home/z/my-project/src/components/admin/admin-shared.tsx:69:/* Status badges (NEW=teal, CONTACTED=medblue, SCHEDULED=navy,         */
+/home/z/my-project/src/components/admin/admin-shared.tsx:74:  NEW: { badge: "border-teal-soft bg-teal-soft/50 text-teal-800", dot: "bg-teal" },
+/home/z/my-project/src/components/admin/admin-shared.tsx:75:  CONTACTED: { badge: "border-cyan-200 bg-cyan-50 text-cyan-800", dot: "bg-cyan-600" },
+/home/z/my-project/src/components/admin/admin-shared.tsx:77:  COMPLETED: { badge: "border-emerald-200 bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
+/home/z/my-project/src/components/admin/admin-shared.tsx:78:  CANCELLED: { badge: "border-red-200 bg-red-50 text-red-700", dot: "bg-red-500" },
+/home/z/my-project/src/components/admin/admin-shared.tsx:82:  const style = STATUS_STYLES[status] ?? { badge: "border-brandborder bg-soft text-inkmuted", dot: "bg-inkmuted" };
+/home/z/my-project/src/components/admin/admin-shared.tsx:85:      <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} aria-hidden />
+/home/z/my-project/src/components/admin/admin-shared.tsx:119:        <Skeleton key={i} className="h-12 w-full rounded-xl" />
+/home/z/my-project/src/components/admin/admin-shared.tsx:127:    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-brandborder bg-card/60 px-6 py-12 text-center">
+/home/z/my-project/src/components/admin/admin-shared.tsx:138:    <div className="overflow-hidden rounded-2xl border border-brandborder bg-card">
+/home/z/my-project/src/components/admin/admin-shared.tsx:197:    <div className="flex items-start justify-between gap-4 rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+/home/z/my-project/src/components/admin/FaqsTab.tsx:120:      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-xl">
+/home/z/my-project/src/components/admin/FaqsTab.tsx:128:            <Input id="faq-question" value={draft.question} onChange={(e) => set("question", e.target.value)} className="rounded-xl" placeholder="e.g. Do I need to fast before a blood test?" />
+/home/z/my-project/src/components/admin/FaqsTab.tsx:136:              className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+/home/z/my-project/src/components/admin/FaqsTab.tsx:141:              <Input id="faq-category" value={draft.category} onChange={(e) => set("category", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/FaqsTab.tsx:144:              <Input id="faq-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+/home/z/my-project/src/components/admin/FaqsTab.tsx:147:          <div className="flex items-start justify-between gap-4 rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+/home/z/my-project/src/components/admin/FaqsTab.tsx:159:          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/FaqsTab.tsx:162:          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+/home/z/my-project/src/components/admin/FaqsTab.tsx:226:          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+/home/z/my-project/src/components/admin/FaqsTab.tsx:236:        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+/home/z/my-project/src/components/admin/FaqsTab.tsx:249:              <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
+/home/z/my-project/src/components/admin/FaqsTab.tsx:259:                <tr key={f.id} className="border-b border-brandborder/70 transition-colors last:border-0 hover:bg-soft/60">
+/home/z/my-project/src/components/admin/FaqsTab.tsx:276:                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label="Edit FAQ" onClick={() => setDialog({ mode: "edit", faq: f })}>
+/home/z/my-project/src/components/admin/FaqsTab.tsx:285:                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label="Delete FAQ" disabled={remove.isPending}>

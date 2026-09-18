@@ -139,6 +139,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="#/track" onClick={link("#/track")} className="text-white/70 hover:text-gold">
+                  Track Your Request
+                </Link>
+              </li>
+              <li>
                 <Link href="#/reports" onClick={link("#/reports")} className="text-white/70 hover:text-gold">
                   Online Report Access
                 </Link>

@@ -1,3 +1,4 @@
+201 /home/z/my-project/worklog.md
 # Project Worklog — Crystal Diagnostic Centre Website
 
 ## Project Brief
@@ -140,7 +141,7 @@ Work Log:
 - CategoriesTab.tsx: CategoryDialog openState effect → `lastOpenState` guard; draft rebuild + `setNameError(undefined)` preserved verbatim; useEffect import removed.
 - FaqsTab.tsx: FaqDialog openState effect → `lastOpenState` guard; draft rebuild + `setFieldErrors({})` preserved verbatim; useEffect import removed.
 - GalleryTab.tsx: GalleryDialog `open` prop effect → `lastOpenState` guard (prop named `open` here); draft rebuild + `setTitleError(undefined)` preserved verbatim; useEffect import removed (useRef kept for fileInputRef).
-- MessagesTab.tsx: same two fixes as AppointmentsTab — syncKey guard for notes/status ([messageId, message?.internalNotes, message?.status] deps replicated) and state-held rolling map replacing seenRef (react-hooks/refs); `messages` was already useMemo'd so no extra stabilization needed. Removed now-unused useEffect+useRef imports.
+- MessagesTab.tsx: same two fixes as AppointmentsTab — syncKey guard for notes/status (essageId, message?.internalNotes, message?.status] deps replicated) and state-held rolling map replacing seenRef (react-hooks/refs); `messages` was already useMemo'd so no extra stabilization needed. Removed now-unused useEffect+useRef imports.
 - PackagesTab.tsx: PackageDialog openState effect → `lastOpenState` guard; `setDraft(editing ? toDraft(editing) : { ...EMPTY_DRAFT })` + `setFieldErrors({})` preserved verbatim; useEffect import removed.
 - ServicesTab.tsx: ServiceDialog openState effect → `lastOpenState` guard; `setDraft(editing ? toDraft(editing) : { ...EMPTY_DRAFT, published: true })` (note the create-mode `published: true` override) + `setFieldErrors({})` preserved verbatim; useEffect import removed.
 - Scope: only the 7 listed files touched. No renames/refactors/styling. Note: react-hooks/refs errors in AppointmentsTab/MessagesTab (out-of-scope type but same files, blocking the 0-error gate) were fixed minimally inside those files as required by the verify step.
@@ -199,24 +200,3 @@ Stage Summary:
 - Site fully transformed to Lamborghini Midnight Showroom design system; admin dashboard fully operational (was unreachable before this phase)
 - All 14 image assets in place; QA verified end-to-end on desktop + mobile
 - Known minor: WhatsApp hex FAB can overlap hero content on small screens (standard FAB behaviour, acceptable); footer year reflects sandbox clock (2026)
-
----
-Task ID: 5 (lead, after cancelled subagent attempts)
-Agent: Z.ai Code (lead)
-Task: Real photos from Google Maps + appointment tracker + design-compliance fixes + Package Finder/OpenNow
-
-Work Log:
-- USER REQUEST: resolved 4 maps.app.goo.gl links (real photos of the centre) → extracted lh3.googleusercontent.com GPS photo URLs → downloaded at high res to public/images/gallery/centre-{1..4}.jpg (sonography room 1920x864, X-ray room 1920x897, reception portrait 1200x2668, illuminated night storefront 1116x934)
-- Inserted 4 GalleryImage rows (Centre/Reception/Equipment/Facilities, published, sortOrder -40..-10 so real photos lead the gallery; total 10 rows). Replaced public/images/about-centre.jpg with the real storefront (Home "Why Choose Us" plate + About figure now show the real centre). Updated GalleryPage hero/meta + placeholder note to say real photos are included; About figcaption now reads "Actual photograph…".
-- TRACKER (5-c): Prisma AppointmentRequest + `reference String @unique` (safe two-step push w/ temporary default + node backfill script → CDC-93PCC6 for the pre-existing row). POST /api/appointments now generates CDC-XXXXXX (unambiguous alphabet, clash-checked) and returns it. NEW public GET /api/appointments/track (rate-limited 20/10min, requires reference+exact mobile, single generic 404 for both mismatches, masked name, privacy-safe projection).
-- TrackPage.tsx (#/track, lazy route in RouteRenderer + store) with 4-step gold timeline (RECEIVED/CONTACTED/SCHEDULED/COMPLETED, CANCELLED handled), status legend sidebar, privacy card, phone CTA; STATUS_META dark semantic chips. Header NAV + Footer Patient Resources gained "Track". BookTestPage success panel shows the reference in a gold plate with COPY button + "Track Your Request" ghost CTA (res typed via api.post<T>). AppointmentDTO + admin search (q matches reference) + AppointmentsTab Ref column (desktop table + mobile cards + dialog description).
-- DEV SERVER RESTART required: running process held a pre-`reference` Prisma client → PrismaClientValidationError on create; `pkill next dev` + fresh `bun run dev` fixed it.
-- DESIGN COMPLIANCE (5-a): FloatingActions WhatsApp FAB green #25D366 → nested hex charcoal glass (white/25 ring) with gold hover + desktop hover label "WHATSAPP"; call FAB gains hover dark-gold. admin-shared: dark semantic StatusBadge set (NEW=gold, CONTACTED=cyan-pulse, SCHEDULED=white, COMPLETED=emerald-400 documented exception, CANCELLED=destructive; square dots), de-rounded ListSkeleton/EmptyState/ResponsiveTableWrap/SwitchRow, TabHeader font-display uppercase. OverviewTab: sharp cards, hex gold icon plates, gold/white-15 chart bars + sharp legend squares, metal gold badges, font-display titles, sharp quick actions. Swept ALL remaining rounded-* tokens across every admin tab (sed pass: 113 → 0).
-- FEATURES (5-b): OpenNowBadge.tsx (Asia/Kolkata live clock via Intl, hydration-safe render-phase sync to satisfy react-hooks/set-state-in-effect, gold OPEN/CLOSED muted states + HoursNote export) integrated into ContactPage Working Hours card. PackageFinder.tsx 3-step quiz (goal/who/when, keyword+bonus scoring over name/description/tests, featured tiebreak) with sharp option tiles, 3-bar gold progress, recommendation card (tests badge, formatPrice, VIEW PACKAGE gold CTA + RESTART) + "Suggestions are indicative" demo note; mounted above the grid on PackagesPage.
-- QA (agent-browser): gallery shows real photos first (ALL 10 / CENTRE 3 / RECEPTION 2); about serves 1116x934 storefront after cache-bypass reload; E2E booking as Anita Deshmukh → CDC-XPDMDH rendered in success panel; #/track lookup renders RECEIVED timeline; negative tests (wrong mobile / wrong ref) → identical generic 404; admin dashboard + appointments tab fully dark w/ gold Ref column; quiz walk → "Full Body Checkup" recommendation; OpenNowBadge = "Open Now" (Fri ~13:10 IST); mobile FABs palette-compliant.
-- eslint . → 0 problems; tsc clean outside pre-existing examples/skills noise.
-
-Stage Summary:
-- Site now features REAL photographs (user-supplied via Google Maps) leading the gallery and the About/Home image plates; public appointment tracking with reference codes is live end-to-end; admin is 100% Midnight Showroom (zero rounded-*, no off-palette colors); two new patient-facing features (Package Finder, Open-Now badge) shipped.
-- Documented exception: emerald-400 kept for COMPLETED status semantics (success state) — everything else strictly monochrome+gold.
-- Risks/next: PackageFinder keyword scoring is heuristic (tune keywords as real package data lands); OpenNowBadge hours are hardcoded mirror of indicative footer hours (could move to SiteSetting); consider adding reference to CSV export; WhatsApp FAB tooltip is desktop-only.

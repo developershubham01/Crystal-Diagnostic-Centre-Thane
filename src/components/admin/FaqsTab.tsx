@@ -117,7 +117,7 @@ function FaqDialog({
 
   return (
     <Dialog open={!!openState} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-ink">{editing ? "Edit FAQ" : "Add new FAQ"}</DialogTitle>
           <DialogDescription>Questions shown in the public FAQ section.</DialogDescription>
@@ -125,7 +125,7 @@ function FaqDialog({
 
         <div className="space-y-4">
           <AdminField id="faq-question" label="Question" required error={fieldErrors.question}>
-            <Input id="faq-question" value={draft.question} onChange={(e) => set("question", e.target.value)} className="rounded-xl" placeholder="e.g. Do I need to fast before a blood test?" />
+            <Input id="faq-question" value={draft.question} onChange={(e) => set("question", e.target.value)} placeholder="e.g. Do I need to fast before a blood test?" />
           </AdminField>
           <AdminField id="faq-answer" label="Answer" required error={fieldErrors.answer}>
             <textarea
@@ -133,18 +133,18 @@ function FaqDialog({
               rows={4}
               value={draft.answer}
               onChange={(e) => set("answer", e.target.value)}
-              className="flex w-full rounded-xl border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
+              className="flex w-full border border-input bg-card px-3 py-2 text-sm shadow-xs placeholder:text-inkmuted focus-visible:outline-2 focus-visible:outline-medblue"
             />
           </AdminField>
           <div className="grid gap-4 sm:grid-cols-2">
             <AdminField id="faq-category" label="Category" hint="Grouping label, e.g. Preparation.">
-              <Input id="faq-category" value={draft.category} onChange={(e) => set("category", e.target.value)} className="rounded-xl" />
+              <Input id="faq-category" value={draft.category} onChange={(e) => set("category", e.target.value)} />
             </AdminField>
             <AdminField id="faq-sort" label="Sort order">
-              <Input id="faq-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+              <Input id="faq-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} />
             </AdminField>
           </div>
-          <div className="flex items-start justify-between gap-4 rounded-xl border border-brandborder bg-soft/50 px-4 py-3">
+          <div className="flex items-start justify-between gap-4 border border-brandborder bg-soft/50 px-4 py-3">
             <div>
               <label htmlFor="faq-published" className="text-sm font-semibold text-ink">
                 Published
@@ -156,10 +156,10 @@ function FaqDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
-          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending}>
+          <Button onClick={handleSave} disabled={save.isPending}>
             {save.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -223,7 +223,7 @@ export function FaqsTab() {
         title="FAQs"
         description="Frequently asked questions shown on the public FAQ page."
         actions={
-          <Button className="rounded-xl" onClick={() => setDialog({ mode: "create" })}>
+          <Button onClick={() => setDialog({ mode: "create" })}>
             <Plus className="h-4 w-4" aria-hidden />
             Add FAQ
           </Button>
@@ -233,7 +233,7 @@ export function FaqsTab() {
       {list.isLoading ? (
         <ListSkeleton rows={5} />
       ) : list.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">Could not load FAQs. Please refresh.</CardContent>
         </Card>
       ) : faqs.length === 0 ? (
@@ -273,7 +273,7 @@ export function FaqsTab() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="rounded-xl text-medblue hover:text-ink" aria-label="Edit FAQ" onClick={() => setDialog({ mode: "edit", faq: f })}>
+                      <Button variant="ghost" size="icon" className="text-medblue hover:text-ink" aria-label="Edit FAQ" onClick={() => setDialog({ mode: "edit", faq: f })}>
                         <Pencil className="h-4 w-4" aria-hidden />
                       </Button>
                       <DeleteConfirmDialog
@@ -282,7 +282,7 @@ export function FaqsTab() {
                         onConfirm={() => remove.mutate(f)}
                         disabled={remove.isPending}
                       >
-                        <Button variant="ghost" size="icon" className="rounded-xl text-destructive hover:bg-destructive/5" aria-label="Delete FAQ" disabled={remove.isPending}>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/5" aria-label="Delete FAQ" disabled={remove.isPending}>
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </Button>
                       </DeleteConfirmDialog>

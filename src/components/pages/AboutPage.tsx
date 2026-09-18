@@ -109,14 +109,14 @@ export function AboutPage() {
               <div className="aero-cut relative aspect-[4/3] w-full overflow-hidden border border-white/10">
                 <img
                   src="/images/about-centre.jpg"
-                  alt="Representative view of a modern neighbourhood diagnostic centre"
+                  alt="Crystal Diagnostic Centre storefront at night with illuminated signboard, Uthalsar Naka, Thane"
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
               </div>
               <div className="gold-line mt-4" aria-hidden />
               <figcaption className="mt-3 text-center text-[11px] uppercase tracking-[0.16em] text-inkmuted">
-                Representative image — to be replaced with photographs of the centre.
+                Actual photograph — the illuminated Crystal Diagnostic Centre frontage at Uthalsar Naka, Thane West.
               </figcaption>
             </figure>
           </Reveal>

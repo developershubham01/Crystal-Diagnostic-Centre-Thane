@@ -6,6 +6,7 @@ import { Breadcrumbs, JsonLd, PageHero, breadcrumbSchema } from "@/components/si
 import { usePackages, useSettings } from "@/lib/hooks";
 import { usePageMeta } from "@/lib/seo";
 import { PackageCard } from "./PackageCard";
+import { PackageFinder } from "./PackageFinder";
 import { EmptyState, ErrorState } from "./PageStates";
 
 export function PackagesPage() {
@@ -66,6 +67,9 @@ export function PackagesPage() {
 
         {!isLoading && !isError && list.length > 0 && (
           <>
+            <div className="mb-10">
+              <PackageFinder packages={list} />
+            </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {list.map((pkg, i) => (
                 <Reveal key={pkg.id} delay={Math.min(i * 0.06, 0.3)}>

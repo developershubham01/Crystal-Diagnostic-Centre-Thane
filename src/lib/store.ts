@@ -16,6 +16,7 @@ export type Route =
   | { name: "packages" }
   | { name: "package-detail"; slug: string }
   | { name: "book-test" }
+  | { name: "track" }
   | { name: "reports" }
   | { name: "contact" }
   | { name: "gallery" }
@@ -40,6 +41,8 @@ function parseHash(hash: string): Route {
       return parts[1] ? { name: "package-detail", slug: parts[1] } : { name: "packages" };
     case "book-test":
       return { name: "book-test" };
+    case "track":
+      return { name: "track" };
     case "reports":
       return { name: "reports" };
     case "contact":

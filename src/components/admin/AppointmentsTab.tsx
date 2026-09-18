@@ -138,7 +138,7 @@ function AppointmentDetailDialog({
 
   return (
     <Dialog open={!!appointmentId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         {appointment ? (
           <>
             <DialogHeader>
@@ -147,7 +147,7 @@ function AppointmentDetailDialog({
                 <StatusBadge status={status} />
               </DialogTitle>
               <DialogDescription>
-                Received {fmtDateTime(appointment.createdAt)} · Reference {appointment.id.slice(-8).toUpperCase()}
+                Received {fmtDateTime(appointment.createdAt)} · Reference {appointment.reference}
               </DialogDescription>
             </DialogHeader>
 
@@ -203,7 +203,7 @@ function AppointmentDetailDialog({
                 <Separator className="bg-brandborder" />
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wide text-inkmuted">Patient message</p>
-                  <p className="mt-1 whitespace-pre-line rounded-xl bg-soft/70 p-3 text-sm leading-relaxed text-ink">
+                  <p className="mt-1 whitespace-pre-line bg-soft/70 p-3 text-sm leading-relaxed text-ink">
                     {appointment.message}
                   </p>
                 </div>
@@ -222,7 +222,7 @@ function AppointmentDetailDialog({
                     patch.mutate({ status: v });
                   }}
                 >
-                  <SelectTrigger id="appointment-status" className="mt-1.5 w-full rounded-xl sm:w-64">
+                  <SelectTrigger id="appointment-status" className="mt-1.5 w-full sm:w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,13 +246,13 @@ function AppointmentDetailDialog({
                   placeholder="e.g. Called on 12 Jan, patient will visit Tuesday 9 AM."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="mt-1.5 rounded-xl"
+                  className="mt-1.5"
                 />
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="rounded-xl"
+                   
                     disabled={patch.isPending || notes === (appointment.internalNotes ?? "")}
                     onClick={() => patch.mutate({ internalNotes: notes })}
                   >
@@ -267,7 +267,7 @@ function AppointmentDetailDialog({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="rounded-xl text-destructive hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
+                      className="text-destructive hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
                       disabled={remove.isPending}
                     >
                       {remove.isPending ? "Deleting…" : "Delete request"}
@@ -342,7 +342,7 @@ export function AppointmentsTab() {
         title="Appointment Requests"
         description="Every online booking request from the public site. Open a request to call the patient, update its status and keep internal notes."
         actions={
-          <Button variant="outline" className="rounded-xl" onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}>
+          <Button variant="outline" onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}>
             <Download className="h-4 w-4" aria-hidden />
             Export CSV
           </Button>
@@ -350,7 +350,7 @@ export function AppointmentsTab() {
       />
 
       {/* Filters */}
-      <div className="mb-4 grid gap-3 rounded-2xl border border-brandborder bg-card p-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-4 grid gap-3 border border-brandborder bg-card p-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="relative lg:col-span-2">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-inkmuted" aria-hidden />
           <Input
@@ -358,12 +358,12 @@ export function AppointmentsTab() {
             placeholder="Search name, mobile or test…"
             value={filters.q}
             onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
-            className="rounded-xl pl-9"
+            className="pl-9"
             aria-label="Search appointment requests"
           />
         </div>
         <Select value={filters.status} onValueChange={(v) => setFilters((f) => ({ ...f, status: v }))}>
-          <SelectTrigger className="w-full rounded-xl" aria-label="Filter by status">
+          <SelectTrigger className="w-full" aria-label="Filter by status">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -381,7 +381,7 @@ export function AppointmentsTab() {
           max={filters.to || undefined}
           onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
           aria-label="Received from date"
-          className="rounded-xl"
+         
         />
         <div className="flex items-center gap-2">
           <Input
@@ -390,13 +390,13 @@ export function AppointmentsTab() {
             min={filters.from || undefined}
             onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
             aria-label="Received to date"
-            className="rounded-xl"
+           
           />
           {hasFilters && (
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0 rounded-xl"
+              className="shrink-0"
               aria-label="Clear filters"
               title="Clear filters"
               onClick={() => setFilters(EMPTY_FILTERS)}
@@ -410,7 +410,7 @@ export function AppointmentsTab() {
       {list.isLoading ? (
         <ListSkeleton rows={6} />
       ) : list.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">
             Could not load appointment requests. Please refresh.
           </CardContent>
@@ -437,6 +437,7 @@ export function AppointmentsTab() {
               <thead>
                 <tr className="border-b border-brandborder bg-soft/60 text-[11px] uppercase tracking-wide text-inkmuted">
                   <th scope="col" className="px-4 py-3 font-bold">Received</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Ref</th>
                   <th scope="col" className="px-4 py-3 font-bold">Patient</th>
                   <th scope="col" className="px-4 py-3 font-bold">Test / Package</th>
                   <th scope="col" className="px-4 py-3 font-bold">Preferred</th>
@@ -454,6 +455,7 @@ export function AppointmentsTab() {
                     }`}
                   >
                     <td className="whitespace-nowrap px-4 py-3 text-xs text-inkmuted">{fmtDateTime(a.createdAt)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs font-bold tracking-wider text-gold-text">{a.reference}</td>
                     <td className="px-4 py-3">
                       <p className="font-bold text-ink">
                         {a.name}
@@ -494,6 +496,7 @@ export function AppointmentsTab() {
                       <StatusBadge status={a.status} />
                     </div>
                     <p className="mt-0.5 truncate text-xs text-ink">{a.testOrPackage}</p>
+                    <p className="mt-0.5 font-mono text-[11px] font-bold tracking-wider text-gold-text">{a.reference}</p>
                     <p className="mt-0.5 text-xs text-inkmuted">
                       +91 {a.mobile} · {fmtDateTime(a.createdAt)}
                     </p>

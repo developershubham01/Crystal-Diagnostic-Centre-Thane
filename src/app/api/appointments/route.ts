@@ -6,6 +6,21 @@ import { logAudit } from "@/lib/audit";
 
 const MOBILE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
 
+/** Public tracking code alphabet — no 0/O/1/I to avoid misreading. */
+const REF_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+async function generateReference(): Promise<string> {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    let suffix = "";
+    for (let i = 0; i < 6; i++) suffix += REF_ALPHABET[Math.floor(Math.random() * REF_ALPHABET.length)];
+    const reference = `CDC-${suffix}`;
+    const clash = await db.appointmentRequest.findUnique({ where: { reference }, select: { id: true } });
+    if (!clash) return reference;
+  }
+  // Practically unreachable — fall back to a timestamp-based suffix.
+  return `CDC-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+}
+
 /**
  * GET /api/appointments?status=&q=&from=&to= — list (admin)
  * POST /api/appointments — public appointment REQUEST with validation + rate limit
@@ -24,7 +39,7 @@ export async function GET(req: NextRequest) {
   const appointments = await db.appointmentRequest.findMany({
     where: {
       ...(status && status !== "ALL" ? { status } : {}),
-      ...(q ? { OR: [{ name: { contains: q } }, { mobile: { contains: q } }, { testOrPackage: { contains: q } }] } : {}),
+      ...(q ? { OR: [{ name: { contains: q } }, { mobile: { contains: q } }, { testOrPackage: { contains: q } }, { reference: { contains: q.toUpperCase() } }] } : {}),
       ...(from || to
         ? {
             createdAt: {
@@ -88,6 +103,7 @@ export async function POST(req: NextRequest) {
 
   const appointment = await db.appointmentRequest.create({
     data: {
+      reference: await generateReference(),
       name,
       mobile,
       email: email || null,
@@ -100,5 +116,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ ok: true, id: appointment.id }, { status: 201 });
+  return NextResponse.json({ ok: true, id: appointment.id, reference: appointment.reference }, { status: 201 });
 }

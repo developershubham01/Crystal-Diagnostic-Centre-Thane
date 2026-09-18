@@ -163,11 +163,11 @@ export function AdminLayout({
               <span className="hidden text-sm font-bold text-inkmuted lg:inline">/ {activeLabel}</span>
 
               <div className="ml-auto flex items-center gap-2">
-                <span className="hidden rounded-full border border-brandborder bg-soft px-3 py-1 text-xs font-bold text-ink md:inline">
+                <span className="hidden border border-brandborder bg-soft px-3 py-1 text-xs font-bold text-ink md:inline">
                   {admin.name || admin.username}
                   <span className="ml-1.5 font-medium text-inkmuted">({admin.role})</span>
                 </span>
-                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => navigate("#/")}>
+                <Button variant="outline" size="sm" onClick={() => navigate("#/")}>
                   <ExternalLink className="h-4 w-4" aria-hidden />
                   <span className="hidden sm:inline">View Site</span>
                 </Button>

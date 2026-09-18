@@ -114,6 +114,7 @@ export interface GalleryImageDTO {
 
 export interface AppointmentDTO {
   id: string;
+  reference: string;
   name: string;
   mobile: string;
   email: string | null;

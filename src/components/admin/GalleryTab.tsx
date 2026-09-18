@@ -166,7 +166,7 @@ function GalleryDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-ink">{editing ? "Edit gallery image" : "Add gallery image"}</DialogTitle>
           <DialogDescription>
@@ -176,7 +176,7 @@ function GalleryDialog({
 
         <div className="space-y-4">
           {/* Upload / URL */}
-          <div className="rounded-xl border border-dashed border-brandborder bg-soft/50 p-4">
+          <div className="border border-dashed border-brandborder bg-soft/50 p-4">
             <Label htmlFor="gallery-file" className="flex items-center gap-1.5">
               <UploadCloud className="h-4 w-4 text-medblue" aria-hidden />
               Upload image file
@@ -186,7 +186,7 @@ function GalleryDialog({
               id="gallery-file"
               type="file"
               accept="image/jpeg,image/png,image/webp,image/svg+xml"
-              className="mt-1.5 cursor-pointer rounded-xl"
+              className="mt-1.5 cursor-pointer"
               disabled={uploading}
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -208,12 +208,12 @@ function GalleryDialog({
                 onChange={(e) => set("url", e.target.value)}
                 placeholder="/uploads/example.webp"
                 aria-label="Image URL"
-                className="rounded-xl pl-9"
+                className="pl-9"
               />
             </div>
 
             {draft.url && (
-              <div className="mt-3 overflow-hidden rounded-xl border border-brandborder bg-card">
+              <div className="mt-3 overflow-hidden border border-brandborder bg-card">
                 { }
                 <img
                   src={draft.url}
@@ -228,13 +228,13 @@ function GalleryDialog({
           </div>
 
           <AdminField id="gallery-title" label="Title" required error={titleError}>
-            <Input id="gallery-title" value={draft.title} onChange={(e) => set("title", e.target.value)} className="rounded-xl" placeholder="e.g. Reception area" />
+            <Input id="gallery-title" value={draft.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Reception area" />
           </AdminField>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <AdminField id="gallery-category" label="Category">
               <Select value={draft.category} onValueChange={(v) => set("category", v)}>
-                <SelectTrigger id="gallery-category" className="w-full rounded-xl">
+                <SelectTrigger id="gallery-category" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -247,22 +247,22 @@ function GalleryDialog({
               </Select>
             </AdminField>
             <AdminField id="gallery-sort" label="Sort order">
-              <Input id="gallery-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className="rounded-xl" />
+              <Input id="gallery-sort" type="number" value={draft.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} />
             </AdminField>
           </div>
 
           <AdminField id="gallery-alt" label="Alt text" hint="Describe the image for screen readers and SEO.">
-            <Input id="gallery-alt" value={draft.alt} onChange={(e) => set("alt", e.target.value)} className="rounded-xl" placeholder="e.g. Clean reception desk with seating area" />
+            <Input id="gallery-alt" value={draft.alt} onChange={(e) => set("alt", e.target.value)} placeholder="e.g. Clean reception desk with seating area" />
           </AdminField>
 
           <SwitchRow id="gallery-published" label="Published" note="Visible in the public gallery." checked={draft.published} onCheckedChange={(v) => set("published", v)} />
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="rounded-xl" onClick={onClose} disabled={save.isPending}>
+          <Button variant="outline" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
-          <Button className="rounded-xl" onClick={handleSave} disabled={save.isPending || uploading}>
+          <Button onClick={handleSave} disabled={save.isPending || uploading}>
             {save.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -328,7 +328,7 @@ export function GalleryTab() {
         description="Photos of the centre, reception, facilities and equipment shown on the public gallery page."
         actions={
           <Button
-            className="rounded-xl"
+           
             onClick={() => {
               setEditing(null);
               setDialogOpen(true);
@@ -343,7 +343,7 @@ export function GalleryTab() {
       {list.isLoading ? (
         <ListSkeleton rows={4} />
       ) : list.isError ? (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+        <Card className="border-destructive/30 bg-destructive/5 p-0">
           <CardContent className="p-5 text-sm font-medium text-destructive">Could not load the gallery. Please refresh.</CardContent>
         </Card>
       ) : images.length === 0 ? (
@@ -356,8 +356,8 @@ export function GalleryTab() {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {images.map((img) => (
             <li key={img.id}>
-              <Card className={`h-full rounded-2xl border-brandborder p-0 ${img.published ? "" : "opacity-80"}`}>
-                <div className="relative overflow-hidden rounded-t-2xl bg-soft">
+              <Card className={`h-full border-brandborder p-0 ${img.published ? "" : "opacity-80"}`}>
+                <div className="relative overflow-hidden bg-soft">
                   { }
                   <img
                     src={img.url}
@@ -366,7 +366,7 @@ export function GalleryTab() {
                     className="h-40 w-full object-cover"
                   />
                   {!img.published && (
-                    <span className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                    <span className="absolute left-2 top-2 bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
                       DRAFT
                     </span>
                   )}
@@ -388,7 +388,7 @@ export function GalleryTab() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="rounded-xl text-medblue hover:text-ink"
+                      className="text-medblue hover:text-ink"
                       onClick={() => {
                         setEditing(img);
                         setDialogOpen(true);
@@ -403,7 +403,7 @@ export function GalleryTab() {
                       onConfirm={() => remove.mutate(img)}
                       disabled={remove.isPending}
                     >
-                      <Button variant="ghost" size="sm" className="rounded-xl text-destructive hover:bg-destructive/5" disabled={remove.isPending}>
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/5" disabled={remove.isPending}>
                         <Trash2 className="h-3.5 w-3.5" aria-hidden />
                         Delete
                       </Button>

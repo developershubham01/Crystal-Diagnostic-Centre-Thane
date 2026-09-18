@@ -9,6 +9,7 @@ import {
   Info,
   MapPin,
   Phone,
+  Search,
   Send,
   ShieldCheck,
   Loader2,
@@ -114,6 +115,8 @@ export function BookTestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const minDate = useMemo(todayIso, []);
 
@@ -159,7 +162,7 @@ export function BookTestPage() {
     setSubmitting(true);
     try {
       const label = testOptions.get(form.testValue) ?? form.testValue;
-      await api.post("/api/appointments", {
+      const res = await api.post<{ ok: boolean; id: string; reference?: string }>("/api/appointments", {
         name: form.name.trim(),
         mobile: normaliseMobile(form.mobile),
         email: form.email.trim() || undefined,
@@ -171,6 +174,8 @@ export function BookTestPage() {
         consent: form.consent,
         website: form.website, // honeypot — always empty for humans
       });
+      setReference(res?.reference ?? null);
+      setCopied(false);
       setSubmitted(true);
       toast({
         title: "Request received",
@@ -193,6 +198,8 @@ export function BookTestPage() {
     setErrors({});
     setApiError(null);
     setSubmitted(false);
+    setReference(null);
+    setCopied(false);
   }
 
   const showHomeCollection = settings.homeCollectionAvailable !== "no";
@@ -241,6 +248,41 @@ export function BookTestPage() {
                       Thank you. Your appointment request has been received.
                       <span className="block">Our team will contact you to confirm the details.</span>
                     </h2>
+
+                    {reference && (
+                      <div className="w-full max-w-md border border-gold/30 bg-gold/[0.06] p-4" role="status">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">
+                          Your tracking reference
+                        </p>
+                        <div className="mt-2 flex items-center justify-between gap-3">
+                          <span className="font-mono text-lg font-bold tracking-[0.22em] text-gold-text">{reference}</span>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(reference);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2500);
+                              } catch {
+                                /* clipboard unavailable — reference remains visible */
+                              }
+                            }}
+                            className="border border-white/20 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:border-gold/60 hover:text-gold"
+                            aria-live="polite"
+                          >
+                            {copied ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                        <p className="mt-2 text-xs leading-relaxed text-ash">
+                          Save this code — you can track your request status anytime with it and your mobile number.
+                        </p>
+                        <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("#/track")}>
+                          <Search className="h-4 w-4" aria-hidden />
+                          Track Your Request
+                        </Button>
+                      </div>
+                    )}
+
                     <p className="max-w-md text-sm leading-relaxed text-inkmuted">
                       Requests are typically confirmed during centre working hours. If your test is time-sensitive,
                       you can call us directly at{" "}
