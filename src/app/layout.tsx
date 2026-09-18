@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk, Baloo_2 } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/site/Providers";
@@ -16,6 +16,15 @@ const inter = Inter({
 const grotesk = Space_Grotesk({
   variable: "--font-grotesk",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Baloo 2 — heavy rounded face matching the centre's real signboard lettering;
+// used only by the official brand lockup (--font-brand).
+const baloo = Baloo_2({
+  variable: "--font-brand",
+  subsets: ["latin"],
+  weight: ["700", "800"],
   display: "swap",
 });
 
@@ -48,7 +57,7 @@ export const metadata: Metadata = {
     siteName: "Crystal Diagnostic Centre",
     type: "website",
     locale: "en_IN",
-    images: [{ url: "/images/og-image.jpg", width: 1200, height: 630, alt: "Crystal Diagnostic Centre, Thane" }],
+    images: [{ url: "/images/og-image.jpg", width: 1440, height: 704, alt: "Crystal Diagnostic Centre, Thane" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -78,7 +87,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${inter.variable} ${grotesk.variable} antialiased bg-background text-foreground font-sans`}
+        className={`${inter.variable} ${grotesk.variable} ${baloo.variable} antialiased bg-background text-foreground font-sans`}
       >
         <Providers>
           <AppShell>{children}</AppShell>

@@ -216,7 +216,7 @@ Lamborghini achieves depth through surface color layering rather than shadows. O
 - Keep the gray palette achromatic — all neutrals are pure gray without color tinting
 
 ### Don't
-- Introduce additional accent colors beyond gold — the monochrome-plus-gold system is sacred
+- Introduce additional accent colors beyond gold — the monochrome-plus-gold system is sacred *(single documented exception: the official brand lockup below)*
 - Apply border-radius to buttons or cards — curved edges contradict the angular vehicle aesthetic
 - Use LamboType in italic or decorative styles — the brand is always upright and direct
 - Add gradients to buttons or surfaces — depth comes from surface layering, not blending
@@ -226,6 +226,23 @@ Lamborghini achieves depth through surface color layering rather than shadows. O
 - Use Open Sans for display text — LamboType must handle all visible typography
 - Create busy layouts with many small elements — Lamborghini's design is about singular, bold statements
 - Apply shadows to elements — on a black canvas, shadows are meaningless; use surface color shifts instead
+
+## Brand Lockup Exemption (Official Logo)
+
+The centre's **real signboard logo** (recreated as vectors in `src/components/brand/Logo.tsx`,
+static mark in `public/logo.svg` + `src/app/icon.svg`) is the single sanctioned exception to the
+gold-only rule. Do not reuse its colours anywhere else.
+
+- **Badge**: white ring + cyan gradient disc (`#82E4FB → #3BB6EF → #1F86D8`) holding a white
+  ultrasound transducer with three sound waves, tilted 35°.
+- **Wordmark**: "CRYSTAL / DIAGNOSTIC CENTRE" in Baloo 2 (`--font-brand`, weights 700/800) with the
+  authentic cyan gradient (`.brand-gradient-text`) and neon glow (`.brand-glow`); the "O" of
+  DIAGNOSTIC is the hot-pink circle (`#EC5FA8`, inset white ring) with a mini probe.
+- Variants: `LogoMark` (badge only), `LogoHorizontal` (primary), `LogoStacked` (login/centred);
+  `theme="white"` gives a monochrome fallback. `LOGO_MARK_SVG` exports inline SVG for raw-HTML
+  contexts (print slip).
+- Favicon/PWA icons are rendered from `src/app/icon.svg` by `scripts/generate-icons.mjs`
+  (black tile keeps the mark legible on light browser chrome; maskable variants keep a 62% safe zone).
 
 ## 8. Responsive Behavior
 

@@ -306,3 +306,25 @@
   touch-action: pan-y;
   user-select: none;
 }
+
+/* ------------------------------------------------------------------ */
+/* Brand lockup utilities — official Crystal Diagnostic Centre logo    */
+/* (single sanctioned exception to the gold-only accent rule; do not  */
+/*  reuse the brand cyan/pink outside the logo components)            */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  .font-brand {
+    font-family: var(--font-brand), var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  }
+  /* Authentic signboard cyan gradient for wordmark glyphs */
+  .brand-gradient-text {
+    background-image: linear-gradient(180deg, #8ce9fc 0%, #45c0f2 48%, #1e86d6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Soft neon glow + faint white key line, like the illuminated sign */
+  .brand-glow {
+    filter: drop-shadow(0 0 7px rgba(59, 182, 239, 0.38)) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.22));
+  }
+}

@@ -21,6 +21,7 @@ import {
   type AppointmentDTO,
 } from "@/lib/api-client";
 import { APPOINTMENT_STATUSES } from "@/lib/constants";
+import { LOGO_MARK_SVG } from "@/components/brand/Logo";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,8 +90,10 @@ function printAppointmentSlip(a: AppointmentDTO): void {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, Helvetica, sans-serif; color: #111; padding: 32px; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 12px; }
-  .brand { font-size: 20px; font-weight: 800; letter-spacing: 0.06em; }
-  .brand small { display: block; font-size: 11px; font-weight: 400; letter-spacing: 0.14em; color: #444; margin-top: 4px; }
+  .brand { display: flex; gap: 12px; align-items: center; }
+  .brand .bname { font-size: 20px; font-weight: 800; letter-spacing: 0.06em; }
+  .brand .bname small { display: block; font-size: 11px; font-weight: 400; letter-spacing: 0.14em; color: #444; margin-top: 4px; }
+  .brand svg { width: 46px; height: 46px; flex: 0 0 auto; }
   .ref { text-align: right; }
   .ref .code { font-family: Consolas, monospace; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; }
   .ref .label { font-size: 9px; letter-spacing: 0.2em; color: #555; }
@@ -104,7 +107,7 @@ function printAppointmentSlip(a: AppointmentDTO): void {
   @media print { body { padding: 12mm; } }
 </style></head><body>
   <div class="head">
-    <div class="brand">CRYSTAL DIAGNOSTIC CENTRE<small>UTHALSAR NAKA · THANE WEST · +91 88283 93955</small></div>
+    <div class="brand">${LOGO_MARK_SVG}<div class="bname">CRYSTAL DIAGNOSTIC CENTRE<small>UTHALSAR NAKA · THANE WEST · +91 88283 93955</small></div></div>
     <div class="ref"><div class="label">APPOINTMENT REFERENCE</div><div class="code">${esc(a.reference)}</div></div>
   </div>
   <h1>APPOINTMENT REQUEST SUMMARY</h1>
