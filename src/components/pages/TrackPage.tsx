@@ -91,6 +91,17 @@ export function TrackPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TrackResult | null>(null);
+  const [seeded, setSeeded] = useState(false);
+
+  // One-time render-phase sync: prefill the reference from a deep link
+  // such as #/track?reference=CDC-XXXXXX (runs after hydration, so no
+  // SSR mismatch; safe because this lazy page never renders on the server).
+  if (!seeded) {
+    setSeeded(true);
+    const fromHash = typeof window !== "undefined" ? window.location.hash : "";
+    const match = /[?&]reference=([A-Za-z0-9-]+)/.exec(fromHash);
+    if (match) setReference(match[1].toUpperCase());
+  }
 
   const meta = result ? STATUS_META[result.status] ?? STATUS_META.NEW : null;
 

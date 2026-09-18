@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
+  const origin = new URL(req.url).origin;
   const type = searchParams.get("type") || "appointments";
 
   let headers: string[] = [];
@@ -26,8 +27,23 @@ export async function GET(req: NextRequest) {
 
   if (type === "appointments") {
     const data = await db.appointmentRequest.findMany({ orderBy: { createdAt: "desc" } });
-    headers = ["ID", "Received At", "Name", "Mobile", "Email", "Test/Package", "Preferred Date", "Preferred Time", "Home Collection", "Status", "Consent", "Message", "Internal Notes"];
-    rows = data.map((a) => [a.id, a.createdAt.toISOString(), a.name, a.mobile, a.email, a.testOrPackage, a.preferredDate, a.preferredTime, a.homeCollection ? "yes" : "no", a.status, a.consent ? "yes" : "no", a.message, a.internalNotes]);
+    headers = ["Reference", "Received At", "Name", "Mobile", "Email", "Test/Package", "Preferred Date", "Preferred Time", "Home Collection", "Status", "Consent", "Track URL", "Message", "Internal Notes"];
+    rows = data.map((a) => [
+      a.reference,
+      a.createdAt.toISOString(),
+      a.name,
+      a.mobile,
+      a.email,
+      a.testOrPackage,
+      a.preferredDate,
+      a.preferredTime,
+      a.homeCollection ? "yes" : "no",
+      a.status,
+      a.consent ? "yes" : "no",
+      `${origin}/#/track?reference=${encodeURIComponent(a.reference)}`,
+      a.message,
+      a.internalNotes,
+    ]);
   } else if (type === "messages") {
     const data = await db.contactMessage.findMany({ orderBy: { createdAt: "desc" } });
     headers = ["ID", "Received At", "Name", "Phone", "Email", "Subject", "Status", "Consent", "Message", "Internal Notes"];

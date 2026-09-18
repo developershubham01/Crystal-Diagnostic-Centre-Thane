@@ -220,3 +220,22 @@ Stage Summary:
 - Site now features REAL photographs (user-supplied via Google Maps) leading the gallery and the About/Home image plates; public appointment tracking with reference codes is live end-to-end; admin is 100% Midnight Showroom (zero rounded-*, no off-palette colors); two new patient-facing features (Package Finder, Open-Now badge) shipped.
 - Documented exception: emerald-400 kept for COMPLETED status semantics (success state) — everything else strictly monochrome+gold.
 - Risks/next: PackageFinder keyword scoring is heuristic (tune keywords as real package data lands); OpenNowBadge hours are hardcoded mirror of indicative footer hours (could move to SiteSetting); consider adding reference to CSV export; WhatsApp FAB tooltip is desktop-only.
+
+---
+Task ID: 6 (cron round)
+Agent: Z.ai Code (lead)
+Task: Admin operational tooling (CSV ref + print slip), home real-photo strip, PWA installability, router query support
+
+Work Log:
+- STATUS: stable — dev.log clean, home/categories/packages/track APIs 200; tracker re-verified with seeded row CDC-93PCC6 (result card + timeline render, no alerts). No bugs found → proceeded to feature round.
+- CSV EXPORT: /api/admin/export?type=appointments now emits "Reference" as first column plus a "Track URL" column (`{origin}/#/track?reference=...` deep link); internal ID column dropped. Verified via authenticated curl: header + CDC-XPDMDH row correct.
+- ADMIN PRINT SLIP: printAppointmentSlip() in AppointmentsTab — opens a dedicated popup with a black-on-white front-desk slip (brand header, big mono reference, full request table, signature lines, track URL footnote; internal notes deliberately excluded) and auto-invokes window.print(). "Print summary" outline Button added under the dialog header; verified window.open is invoked with the right target.
+- HOME PHOTO STRIP: new "INSIDE THE CENTRE — REAL PHOTOS. NO STAGING." section between Why-Choose-Us and 3D Science, fed by useGallery() (excludes the storefront/centre-4.jpg to avoid duplicating the Why-Choose-Us image) → Reception/Sonography/X-Ray tiles in sharp aero-cut frames with gradient captions + gold category micro-labels, each opening #/gallery; ghost "View Full Gallery" CTA; section hides itself if gallery is empty. Updated Why-Choose-Us img alt to describe the real storefront.
+- ROUTER: parseHash now tolerates hash query strings (#/track?reference=...) by splitting on "?" before path parsing; TrackPage prefills its reference field one-time from the hash query via render-phase sync (lint-safe, hydration-safe). Deep link verified: prefill + successful lookup.
+- PWA: public/manifest.webmanifest (standalone, black theme/background, en-IN, health category, shortcuts for Book/Track/Packages) + metadata manifest link in layout.tsx. Icons rendered from the logo SVG via sharp: pwa-icon-{192,512}.png on a black tile + pwa-icon-maskable-{192,512}.png with the mark scaled into the maskable safe zone. Both serve 200.
+- eslint . → 0 problems; tsc clean (outside pre-existing examples/skills noise); agent-browser verified desktop + mobile.
+
+Stage Summary:
+- Admin front-desk workflow now covers the full lifecycle: reference in list/search/CSV → one-click printable slip → public tracking link shared with the patient.
+- Homepage now leads with authentic real photography (strip + storefront plate), reinforcing trust; PWA manifest makes the site installable with brand-correct black/gold identity.
+- Risks/next: print slip uses a popup (popup blockers silently no-op → could fall back to hidden iframe); PWA has no service worker (offline not yet offered — add one only if wanted); maskable icon mark is the legacy teal/blue logo (a gold-on-black brand mark could be considered); OpenNowBadge hours still hardcoded (move to SiteSetting when hours are confirmed by the centre).

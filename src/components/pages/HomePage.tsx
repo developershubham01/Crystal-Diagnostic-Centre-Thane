@@ -24,7 +24,7 @@ import { LogoMark } from "@/components/brand/Logo";
 import { Lazy3D, loadHeroCrystal, loadDnaShowcase } from "@/components/three/Lazy3D";
 import { Reveal } from "@/components/site/Reveal";
 import { useRouterStore } from "@/lib/store";
-import { useSettings, useCategories, usePackages } from "@/lib/hooks";
+import { useSettings, useCategories, usePackages, useGallery } from "@/lib/hooks";
 import { parseWhyChooseUs } from "@/lib/settings";
 import { usePageMeta } from "@/lib/seo";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -49,6 +49,11 @@ export function HomePage() {
   const { data: settings } = useSettings();
   const { data: categories, isLoading: catsLoading } = useCategories();
   const { data: packages, isLoading: pkgsLoading } = usePackages({ featured: true });
+  const { data: gallery = [] } = useGallery();
+  // The storefront photo already features in "Why Choose Us" — exclude it here.
+  const galleryImages = gallery.filter(
+    (g) => g.url !== "/images/about-centre.jpg" && g.url !== "/images/gallery/centre-4.jpg"
+  );
   const isMobile = useIsMobile() ?? false;
   const whyItems = parseWhyChooseUs(settings.whyChooseUs).slice(0, 4);
   usePageMeta("", settings.seoDescription, "/");
@@ -406,7 +411,7 @@ export function HomePage() {
                 <div className="aero-cut relative bg-iron">
                   <img
                     src="/images/about-centre.jpg"
-                    alt="Representative view of a modern neighbourhood diagnostic centre"
+                    alt="Crystal Diagnostic Centre storefront at night with illuminated signboard, Uthalsar Naka, Thane"
                     className="aspect-[4/3] w-full object-cover"
                     loading="lazy"
                   />
@@ -443,6 +448,52 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ==================== INSIDE THE CENTRE (real photos) ==================== */}
+      {galleryImages.length > 0 && (
+        <section className="section-divider border-t border-[#202020] bg-abyss py-16 sm:py-20" aria-labelledby="inside-heading">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <Reveal>
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="eyebrow">Inside The Centre</p>
+                  <h2 id="inside-heading" className="display-caps mt-3 text-3xl text-ink sm:text-4xl">
+                    Real photos. No staging.
+                  </h2>
+                </div>
+                <Button variant="outline" onClick={() => navigate("#/gallery")}>
+                  View Full Gallery
+                </Button>
+              </div>
+            </Reveal>
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {galleryImages.slice(0, 3).map((img, i) => (
+                <Reveal key={img.id} delay={i * 0.08}>
+                  <button
+                    type="button"
+                    onClick={() => navigate("#/gallery")}
+                    aria-label={`Open photo in gallery: ${img.title}`}
+                    className="group relative block w-full overflow-hidden border border-white/10 transition-colors duration-200 hover:border-gold/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                  >
+                    <div className="aero-cut relative">
+                      <img
+                        src={img.url}
+                        alt={img.alt ?? img.title}
+                        className="aspect-[4/3] w-full object-cover transition-opacity duration-300 group-hover:opacity-80"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-4 pb-3 pt-10 text-left">
+                        <p className="font-display text-[13px] uppercase tracking-[0.08em] text-ink">{img.title}</p>
+                        <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-gold-text">{img.category}</p>
+                      </div>
+                    </div>
+                  </button>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ==================== 3D SCIENCE SHOWCASE ==================== */}
       <section className="relative overflow-hidden bg-navy py-16 text-white sm:py-24" aria-labelledby="science-heading">

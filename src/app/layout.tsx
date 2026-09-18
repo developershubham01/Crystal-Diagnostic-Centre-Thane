@@ -38,6 +38,7 @@ export const metadata: Metadata = {
     "Crystal Diagnostic Centre",
   ],
   authors: [{ name: "Crystal Diagnostic Centre" }],
+  manifest: "/manifest.webmanifest",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Crystal Diagnostic Centre — Precision Diagnostics. Better Health Decisions.",

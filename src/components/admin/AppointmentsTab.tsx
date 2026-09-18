@@ -12,6 +12,7 @@ import {
   Home,
   Mail,
   Phone,
+  Printer,
   Search,
   StickyNote,
 } from "lucide-react";
@@ -70,6 +71,63 @@ function DetailRow({ label, value, icon }: { label: string; value: React.ReactNo
       </div>
     </div>
   );
+}
+
+/**
+ * Opens a print-friendly front-desk slip for an appointment request in a
+ * dedicated popup window (black on white for paper) and invokes printing.
+ * Internal notes are deliberately excluded from the printout.
+ */
+function printAppointmentSlip(a: AppointmentDTO): void {
+  const esc = (s: unknown) =>
+    String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+  const received = new Date(a.createdAt).toLocaleString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true,
+  });
+  const html = `<!doctype html><html><head><meta charset="utf-8" /><title>Appointment ${esc(a.reference)}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #111; padding: 32px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 12px; }
+  .brand { font-size: 20px; font-weight: 800; letter-spacing: 0.06em; }
+  .brand small { display: block; font-size: 11px; font-weight: 400; letter-spacing: 0.14em; color: #444; margin-top: 4px; }
+  .ref { text-align: right; }
+  .ref .code { font-family: Consolas, monospace; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; }
+  .ref .label { font-size: 9px; letter-spacing: 0.2em; color: #555; }
+  h1 { font-size: 13px; letter-spacing: 0.18em; margin: 22px 0 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 7px 0; border-bottom: 1px solid #ddd; font-size: 13px; vertical-align: top; }
+  td.k { width: 180px; font-size: 10px; letter-spacing: 0.14em; color: #555; text-transform: uppercase; padding-right: 12px; }
+  .foot { margin-top: 26px; font-size: 11px; color: #555; border-top: 1px solid #ddd; padding-top: 10px; }
+  .sign { margin-top: 48px; display: flex; justify-content: space-between; font-size: 11px; color: #333; }
+  .sign span { border-top: 1px solid #333; padding-top: 4px; width: 220px; text-align: center; }
+  @media print { body { padding: 12mm; } }
+</style></head><body>
+  <div class="head">
+    <div class="brand">CRYSTAL DIAGNOSTIC CENTRE<small>UTHALSAR NAKA · THANE WEST · +91 88283 93955</small></div>
+    <div class="ref"><div class="label">APPOINTMENT REFERENCE</div><div class="code">${esc(a.reference)}</div></div>
+  </div>
+  <h1>APPOINTMENT REQUEST SUMMARY</h1>
+  <table>
+    <tr><td class="k">Patient</td><td><strong>${esc(a.name)}</strong></td></tr>
+    <tr><td class="k">Mobile</td><td>+91 ${esc(a.mobile)}</td></tr>
+    ${a.email ? `<tr><td class="k">Email</td><td>${esc(a.email)}</td></tr>` : ""}
+    <tr><td class="k">Test / Package</td><td>${esc(a.testOrPackage)}</td></tr>
+    <tr><td class="k">Preferred date</td><td>${a.preferredDate ? esc(a.preferredDate) : "Any"}</td></tr>
+    <tr><td class="k">Preferred time</td><td>${a.preferredTime ? esc(a.preferredTime) : "Any (we will confirm)"}</td></tr>
+    <tr><td class="k">Home collection</td><td>${a.homeCollection ? "Requested" : "Not requested"}</td></tr>
+    <tr><td class="k">Status</td><td>${esc(a.status)}</td></tr>
+    <tr><td class="k">Received</td><td>${esc(received)}</td></tr>
+  </table>
+  <div class="sign"><span>Patient signature</span><span>Front desk</span></div>
+  <div class="foot">Track this request any time at ${esc(`${location.origin}/#/track?reference=${a.reference}`)} with the reference code and the booked mobile number. This is an appointment request summary, not a medical report or bill.</div>
+  <script>window.onload = function () { window.focus(); window.print(); };</script>
+</body></html>`;
+  const w = window.open("", "_blank", "width=800,height=900");
+  if (!w) return;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 function AppointmentDetailDialog({
@@ -150,6 +208,16 @@ function AppointmentDetailDialog({
                 Received {fmtDateTime(appointment.createdAt)} · Reference {appointment.reference}
               </DialogDescription>
             </DialogHeader>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => printAppointmentSlip(appointment)}
+            >
+              <Printer className="h-4 w-4" aria-hidden />
+              Print summary
+            </Button>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <DetailRow label="Patient name" value={appointment.name} />
@@ -252,7 +320,6 @@ function AppointmentDetailDialog({
                   <Button
                     size="sm"
                     variant="outline"
-                   
                     disabled={patch.isPending || notes === (appointment.internalNotes ?? "")}
                     onClick={() => patch.mutate({ internalNotes: notes })}
                   >

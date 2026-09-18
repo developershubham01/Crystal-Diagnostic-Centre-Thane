@@ -28,7 +28,9 @@ export type Route =
   | { name: "not-found" };
 
 function parseHash(hash: string): Route {
-  const clean = hash.replace(/^#\/?/, "").replace(/\/+$/, "");
+  const raw = hash.replace(/^#\/?/, "").replace(/\/+$/, "");
+  // Tolerate query strings in the hash (e.g. #/track?reference=CDC-XXXX)
+  const clean = raw.split("?")[0];
   const parts = clean.split("/").filter(Boolean).map(decodeURIComponent);
 
   if (parts.length === 0) return { name: "home" };

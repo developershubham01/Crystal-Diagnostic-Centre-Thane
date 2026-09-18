@@ -1,0 +1,25 @@
+{
+  "name": "Crystal Diagnostic Centre — Thane",
+  "short_name": "Crystal Dx",
+  "description": "Diagnostic services, blood tests and preventive health packages at Uthalsar Naka, Thane West. Request an appointment and track it online.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "en-IN",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    { "src": "/pwa-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/pwa-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Book a Test", "url": "/#/book-test", "description": "Request an appointment" },
+    { "name": "Track Request", "url": "/#/track", "description": "Track your appointment request" },
+    { "name": "Health Packages", "url": "/#/packages", "description": "Preventive health packages" }
+  ]
+}
