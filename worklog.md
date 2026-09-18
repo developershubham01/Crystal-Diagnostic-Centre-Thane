@@ -342,3 +342,21 @@ Stage Summary:
 - Reception sees unread requests without leaving the dashboard overview (gold badge, self-clearing).
 - Testimonials band is now a shared component on Home + About.
 - Known/next: QR still encodes reference-only by design (scanned at the centre, patient types their own mobile); closed-day booking branch needs a CLOSED day in settings to be seen live; badge poll is 30s (fine for this scale); PWA service worker still intentionally absent.
+---
+Task ID: 12 (cron round)
+Agent: Z.ai Code (lead)
+Task: Site-wide search palette (⌘K) + admin messages alert badge + nav hover micro-interaction
+
+Work Log:
+- STATUS ASSESSMENT: worklog reviewed (Tasks 1–11 complete); health check — all public APIs + tracker 200, dev.log tail clean, home/services agent-browser sweep clean (console silent) → no bugs; proceeded to feature round.
+- FEATURE — SITE SEARCH PALETTE: new src/components/site/SearchDialog.tsx — a cmdk-powered quick finder over ALL content: Diagnostic Services (name + shortDescription keywords), Health Packages (name + description), FAQs (questions), and static Pages (incl. Book a Test, Track, Report Access). Mounted from the header as a controlled Dialog; header trigger chip = Search icon only on mobile, "SEARCH ⌘K" chip on desktop (xl shows label+kbd). Global ⌘K/Ctrl+K toggle listener; closes on Esc / selection / hashchange. Selecting navigates via the hash-router store (e.g. #/services/lipid-profile) — verified end-to-end. Groups render with uppercase micro gold headings; the abyss panel is zero-radius with the four gold corner ticks (aero-cut language), selection = gold left bar + gold tint + arrow reveal (cmdk data-selected via item-level arbitrary variants — child elements can't see the attribute directly), a "no matches" empty state with phone fallback, and a live stats footer ("12 SERVICES · 5 PACKAGES · 6 ANSWERS") + ↑↓/↵ hint bar. Gold text caret detail.
+- FEATURE — MESSAGES ALERT BADGE: generalized the Task 11 alert-chip plumbing — AdminLayout now takes `newCounts: Partial<Record<AdminTabId, number>>` instead of a single appointment count; AdminPage adds a second 30s poll `/api/contact?status=NEW` (key ["admin-messages","new-badge"], invalidates with the Messages tab's mutations). Verified E2E: POSTed a QA contact message → waited out the poll → sidebar showed "Contact Messages — 1 new" (and "Appointment Requests — 2 new"); resolved the row to COMPLETED → count back to 0 (DB left clean).
+- STYLE (mandatory) — NAV HOVER UNDERLINE: desktop nav links' gold underline now also grows on hover (`group` on the Link + `group-hover:scale-x-100` on the hairline), not only on the active route — a subtle Lamborghini-grade micro-interaction. Search palette styling documented in DESIGN.md "Distinctive Components"; Alert Count Chip entry updated to cover both tabs.
+- DEBUGGED: agent-browser eval shares top-level scope across calls → use IIFEs (const collisions); pseudo-class hover states can't be read via computed style after dispatch — verified the `group` class is present and relied on deterministic Tailwind behaviour instead.
+- QA: eslint . → 0 problems; tsc clean (outside pre-existing examples/skills noise); agent-browser — palette opens via chip click AND Ctrl+K, typing "lipid" filters to Lipid Profile first, select → lands on #/services/lipid-profile with dialog closed, Esc closes; mobile 390px: compact search chip beside MENU, full-width palette with corner ticks renders correctly; dev.log tail clean (the lone TestimonialsSection error at line 173/451 is yesterday's documented HMR window, not new).
+
+Stage Summary:
+- Patients can now reach anything in two keystrokes: ⌘K opens a Midnight-Showroom search spanning services, packages, FAQs and pages, with keyboard-first navigation.
+- Reception attention is now fully instrumented: gold alert chips cover both inbound channels (appointment requests + contact messages), self-clearing as staff work through them.
+- Design vocabulary extended: aero-cut search palette + nav hover underline documented in DESIGN.md.
+- Known/next: FAQ entries all deep-link to #/faq (no per-question anchors — could add ids later); palette data is client-cached per mount (refetches on remount, fine at this scale); PWA service worker still intentionally absent.

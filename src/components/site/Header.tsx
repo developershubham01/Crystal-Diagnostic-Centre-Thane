@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, Phone, CalendarCheck, X } from "lucide-react";
+import { Menu, Phone, CalendarCheck, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LogoHorizontal } from "@/components/brand/Logo";
+import { SiteSearch } from "@/components/site/SearchDialog";
 import { useRoute, useRouterStore } from "@/lib/store";
 import { useSettings } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -122,7 +124,7 @@ export function Header() {
                   }}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors",
+                    "group relative py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors",
                     active ? "text-gold" : "text-white/60 hover:text-white"
                   )}
                 >
@@ -131,7 +133,7 @@ export function Header() {
                     aria-hidden
                     className={cn(
                       "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-gold transition-transform duration-300",
-                      active ? "scale-x-100" : "scale-x-0"
+                      active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                     )}
                   />
                 </Link>
@@ -141,6 +143,19 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2.5">
+            {/* Site search — icon chip (mobile) / labeled chip with ⌘K (desktop) */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search the site (Ctrl+K)"
+              aria-haspopup="dialog"
+              aria-expanded={searchOpen}
+              className="inline-flex items-center gap-2 border border-white/25 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/85 transition-colors hover:border-gold hover:text-gold"
+            >
+              <Search className="h-3.5 w-3.5 text-gold" aria-hidden />
+              <span className="hidden xl:inline">Search</span>
+              <kbd className="hidden border border-white/15 bg-white/[0.04] px-1 py-0.5 font-mono text-[9px] font-bold tracking-widest text-ash xl:inline">⌘K</kbd>
+            </button>
             <a
               href="tel:+918828393955"
               className="hidden items-center gap-2 border border-white/25 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/85 transition-colors hover:border-gold hover:text-gold md:inline-flex"
@@ -156,7 +171,6 @@ export function Header() {
               Book a Test
             </Button>
 
-            {/* Mobile drawer — MENU wordmark + hamburger, like the brand's own nav */}
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <button
@@ -215,6 +229,8 @@ export function Header() {
             </Sheet>
           </div>
         </div>
+
+        <SiteSearch open={searchOpen} onOpenChange={setSearchOpen} />
 
         {/* Reading-progress hairline — gold fill, 2px, above the border */}
         <div

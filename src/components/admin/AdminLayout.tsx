@@ -57,18 +57,19 @@ function NavList({
   active,
   onNavigate,
   onAfterNavigate,
-  newRequests = 0,
+  newCounts = {},
 }: {
   active: AdminTabId;
   onNavigate: (tab: AdminTabId) => void;
   onAfterNavigate?: () => void;
-  newRequests?: number;
+  newCounts?: Partial<Record<AdminTabId, number>>;
 }) {
   return (
     <nav aria-label="Admin sections" className="flex-1 space-y-1 overflow-y-auto p-3">
       {ADMIN_TABS.map((tab) => {
         const isActive = tab.id === active;
-        const badge = tab.id === "appointments" && newRequests > 0 ? (newRequests > 9 ? "9+" : String(newRequests)) : null;
+        const count = newCounts[tab.id] ?? 0;
+        const badge = count > 0 ? (count > 9 ? "9+" : String(count)) : null;
         return (
           <button
             key={tab.id}
@@ -77,7 +78,7 @@ function NavList({
               onAfterNavigate?.();
             }}
             aria-current={isActive ? "page" : undefined}
-            aria-label={badge ? `${tab.label} — ${newRequests} new` : undefined}
+            aria-label={badge ? `${tab.label} — ${count} new` : undefined}
             className={cn(
               "flex w-full items-center gap-3 border-l-2 px-3 py-2.5 text-left text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors",
               isActive
@@ -107,14 +108,14 @@ export function AdminLayout({
   active,
   onNavigate,
   onLogout,
-  newRequests = 0,
+  newCounts = {},
   children,
 }: {
   admin: AdminInfo;
   active: AdminTabId;
   onNavigate: (tab: AdminTabId) => void;
   onLogout: () => void;
-  newRequests?: number;
+  newCounts?: Partial<Record<AdminTabId, number>>;
   children: ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -131,7 +132,7 @@ export function AdminLayout({
           <div className="border-b border-brandborder px-5 py-4">
             <LogoHorizontal showTagline={false} />
           </div>
-          <NavList active={active} onNavigate={onNavigate} newRequests={newRequests} />
+          <NavList active={active} onNavigate={onNavigate} newCounts={newCounts} />
           <div className="border-t border-brandborder p-4">
             <p className="text-[11px] leading-relaxed text-inkmuted">
               Signed in as <span className="font-bold text-ink">{admin.name || admin.username}</span>. All
@@ -158,7 +159,7 @@ export function AdminLayout({
                       </div>
                     </SheetTitle>
                   </SheetHeader>
-                  <NavList active={active} onNavigate={onNavigate} onAfterNavigate={() => setDrawerOpen(false)} newRequests={newRequests} />
+                  <NavList active={active} onNavigate={onNavigate} onAfterNavigate={() => setDrawerOpen(false)} newCounts={newCounts} />
                   <div className="border-t border-brandborder p-3">
                     <Button
                       variant="outline"

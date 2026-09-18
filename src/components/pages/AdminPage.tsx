@@ -343,16 +343,28 @@ export function AdminPage() {
   const [tab, setTab] = useState<AdminTabId>("overview");
   const { toast } = useToast();
 
-  // Lightweight poll for unread appointment requests — powers the gold alert
-  // badge on the sidebar. Shares the "admin-appointments" key prefix, so any
-  // status change made in the tab refreshes the badge instantly.
+  // Lightweight polls for unread appointment requests and contact messages —
+  // power the gold alert badges on the sidebar. Shared key prefixes mean any
+  // status change inside a tab refreshes its badge instantly.
   const newApptQuery = useQuery({
     queryKey: ["admin-appointments", "new-badge"],
     queryFn: () => api.get<{ id: string }[]>("/api/appointments?status=NEW"),
     enabled: phase === "authed",
     refetchInterval: 30_000,
   });
-  const newRequests = phase === "authed" ? (newApptQuery.data?.length ?? 0) : 0;
+  const newMsgQuery = useQuery({
+    queryKey: ["admin-messages", "new-badge"],
+    queryFn: () => api.get<{ id: string }[]>("/api/contact?status=NEW"),
+    enabled: phase === "authed",
+    refetchInterval: 30_000,
+  });
+  const newCounts = useMemo(
+    () =>
+      phase === "authed"
+        ? { appointments: newApptQuery.data?.length ?? 0, messages: newMsgQuery.data?.length ?? 0 }
+        : {},
+    [phase, newApptQuery.data, newMsgQuery.data]
+  );
 
   useEffect(() => {
     let live = true;
@@ -404,7 +416,7 @@ export function AdminPage() {
   }
 
   return (
-    <AdminLayout admin={admin} active={tab} onNavigate={setTab} onLogout={handleLogout} newRequests={newRequests}>
+    <AdminLayout admin={admin} active={tab} onNavigate={setTab} onLogout={handleLogout} newCounts={newCounts}>
       {renderTab(tab, setTab)}
     </AdminLayout>
   );
