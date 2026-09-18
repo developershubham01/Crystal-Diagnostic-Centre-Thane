@@ -24,6 +24,7 @@ import { LogoMark } from "@/components/brand/Logo";
 import { Lazy3D, loadHeroCrystal, loadDnaShowcase } from "@/components/three/Lazy3D";
 import { Reveal } from "@/components/site/Reveal";
 import { TestimonialsSection } from "@/components/site/TestimonialsSection";
+import { ServiceTicker } from "@/components/site/ServiceTicker";
 import { useRouterStore } from "@/lib/store";
 import { useSettings, useCategories, usePackages, useGallery } from "@/lib/hooks";
 import { parseWhyChooseUs } from "@/lib/settings";
@@ -250,6 +251,9 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ==================== SERVICES TICKER ==================== */}
+      <ServiceTicker />
 
       {/* ==================== TRUST & CONVENIENCE ==================== */}
       <section className="py-16 sm:py-24" aria-labelledby="trust-heading">

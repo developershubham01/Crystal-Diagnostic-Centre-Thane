@@ -205,7 +205,7 @@ export function FaqPage() {
                     type="single"
                     collapsible
                     className="mt-4 border border-white/10 bg-card px-5"
-                    value={openMap[group.category]}
+                    value={openMap[group.category] ?? ""}
                     onValueChange={(v) => setOpenMap((m) => ({ ...m, [group.category]: v }))}
                   >
                     {group.items.map((faq) => (

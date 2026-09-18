@@ -165,9 +165,10 @@
     background: #ffc000;
     color: #000000;
   }
-  /* Sharp input corners + dark autofill */
+  /* Sharp input corners + dark autofill + molten caret */
   input, textarea, select {
     border-radius: 0;
+    caret-color: #ffc000;
   }
   input:-webkit-autofill,
   textarea:-webkit-autofill,
@@ -350,4 +351,17 @@
   .btn-sheen:hover::after {
     transform: translateX(130%) skewX(-18deg);
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Gold services ticker — seamless -50% marquee loop (duplicated      */
+/* track); pauses on hover; frozen to a static frame globally under   */
+/* prefers-reduced-motion by the blanket animation rule above.        */
+/* ------------------------------------------------------------------ */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 38s linear infinite;
 }

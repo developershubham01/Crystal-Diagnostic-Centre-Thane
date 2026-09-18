@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Download,
   ExternalLink,
+  FlaskConical,
   HelpCircle,
   Images,
   Inbox,
@@ -37,6 +38,7 @@ interface StatsDTO {
   galleryCount: number;
   statusCounts: Record<string, number>;
   trend: { date: string; count: number }[];
+  topTests: { name: string; count: number }[];
 }
 
 function useCountUp(target: number, duration = 750): number {
@@ -159,6 +161,61 @@ function TrendChart({ trend }: { trend: { date: string; count: number }[] }) {
   );
 }
 
+function TopTestsCard({ tests }: { tests: { name: string; count: number }[] }) {
+  const max = Math.max(1, ...tests.map((t) => t.count));
+  return (
+    <Card className="border-white/10 bg-card p-0">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 font-display text-base uppercase tracking-wide text-ink">
+          <FlaskConical className="h-4 w-4 text-gold" aria-hidden />
+          Most requested tests
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-5 pt-0">
+        {tests.length === 0 ? (
+          <p className="py-6 text-center text-sm text-inkmuted">
+            No requests yet — demand rankings will appear here as bookings arrive.
+          </p>
+        ) : (
+          <ol className="space-y-3.5">
+            {tests.map((t, i) => {
+              const pct = Math.max(4, Math.round((t.count / max) * 100));
+              return (
+                <li key={t.name} className="group">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="min-w-0 truncate text-[13px] font-bold text-ink" title={t.name}>
+                      <span
+                        className="mr-2 inline-block w-5 text-right font-display text-[15px] text-gold/70 transition-colors group-hover:text-gold"
+                        aria-hidden
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      {t.name}
+                    </p>
+                    <span className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.1em] text-ash">
+                      {t.count} request{t.count === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div
+                    className="mt-1.5 h-1.5 w-full bg-white/[0.06]"
+                    role="img"
+                    aria-label={`${t.name}: ${t.count} request${t.count === 1 ? "" : "s"} — rank ${i + 1} of ${tests.length}`}
+                  >
+                    <div
+                      className={`h-full ${i === 0 ? "bg-gold" : "bg-gold/45"} transition-all duration-700 ease-out group-hover:bg-gold`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => void }) {
   const navigate = useRouterStore((s) => s.navigate);
 
@@ -256,6 +313,9 @@ export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => v
               </CardContent>
             </Card>
           </div>
+
+          {/* Demand ranking */}
+          <TopTestsCard tests={s.topTests ?? []} />
 
           {/* Recent requests */}
           <Card className="border-white/10 bg-card p-0">

@@ -52,6 +52,24 @@ const TIME_SLOTS = [
   "Evening (5:00 PM – 9:00 PM)",
 ];
 
+/** Minute-of-day range for each canonical slot, used to test overlap with
+ *  the centre's opening hours on the chosen date. */
+const SLOT_RANGES: Record<string, [number, number]> = {
+  "Morning (7:00 AM – 11:00 AM)": [7 * 60, 11 * 60],
+  "Midday (11:00 AM – 2:00 PM)": [11 * 60, 14 * 60],
+  "Afternoon (2:00 PM – 5:00 PM)": [14 * 60, 17 * 60],
+  "Evening (5:00 PM – 9:00 PM)": [17 * 60, 21 * 60],
+};
+
+/** 420 → "7:00 AM" — used by the slot guardrail hints. */
+function fmtMinutes(mins: number): string {
+  const h24 = Math.floor(mins / 60);
+  const m = mins % 60;
+  const ampm = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return m === 0 ? `${h12}:00 ${ampm}` : `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+
 const OTHER_OPTION = "__other__";
 
 interface FormState {
@@ -153,6 +171,27 @@ export function BookTestPage() {
   );
   const liveDateIssue = dateIssue(form.preferredDate);
 
+  // Opening window for the chosen date (null until a valid date is picked).
+  const dayHours: [number, number] | null = useMemo(() => {
+    if (!form.preferredDate || liveDateIssue) return null;
+    return weekHours[weekdayOf(form.preferredDate)] ?? null;
+  }, [form.preferredDate, liveDateIssue, weekHours]);
+
+  // A slot works when it overlaps the day's open window (patients may arrive
+  // any time the centre is open inside that band).
+  const slotIssue = useMemo(
+    () =>
+      (slot: string): string | null => {
+        if (!dayHours || !slot) return null;
+        const [open, close] = dayHours;
+        const [start, end] = SLOT_RANGES[slot] ?? [0, 24 * 60];
+        if (start < close && end > open) return null;
+        return `The centre is open ${fmtMinutes(open)} – ${fmtMinutes(close)} on this day — the ${slot.split(" (")[0].toLowerCase()} slot falls outside those hours.`;
+      },
+    [dayHours]
+  );
+  const liveSlotIssue = slotIssue(form.preferredTime);
+
   // value -> display label for the test/package dropdown
   const testOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -196,6 +235,10 @@ export function BookTestPage() {
     if (!form.testValue) errs.testValue = "Please choose a test, package, or 'Other'.";
     const dateProblem = form.preferredDate ? dateIssue(form.preferredDate) : null;
     if (dateProblem) errs.preferredDate = dateProblem;
+    if (!dateProblem && form.preferredTime) {
+      const slotProblem = slotIssue(form.preferredTime);
+      if (slotProblem) errs.preferredTime = slotProblem;
+    }
     if (form.message.length > 2000) errs.message = "Message is too long (max 2000 characters).";
     if (!form.consent) errs.consent = "Please provide consent so our team can contact you.";
     return errs;
@@ -554,18 +597,39 @@ export function BookTestPage() {
                           <Select value={form.preferredTime} onValueChange={(v) => set("preferredTime", v)}>
                             <SelectTrigger
                               id="book-time"
+                              aria-invalid={!!liveSlotIssue}
+                              aria-describedby={liveSlotIssue ? "book-time-issue" : "book-time-hint"}
                               className="mt-1.5 w-full border-white/15 bg-iron text-ink focus-visible:border-gold focus-visible:ring-gold/40 data-[placeholder]:text-inkmuted"
                             >
                               <SelectValue placeholder="Any time (we will confirm)" />
                             </SelectTrigger>
                             <SelectContent>
-                              {TIME_SLOTS.map((slot) => (
-                                <SelectItem key={slot} value={slot}>
-                                  {slot}
-                                </SelectItem>
-                              ))}
+                              {TIME_SLOTS.map((slot) => {
+                                const outside = !!slotIssue(slot);
+                                return (
+                                  <SelectItem key={slot} value={slot} disabled={outside}>
+                                    {slot}
+                                    {outside && (
+                                      <span className="pl-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-inkmuted">
+                                        — outside opening hours
+                                      </span>
+                                    )}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
+                          {liveSlotIssue ? (
+                            <p id="book-time-issue" role="alert" aria-live="polite" className="mt-1.5 text-xs font-medium text-destructive">
+                              {liveSlotIssue}
+                            </p>
+                          ) : dayHours ? (
+                            <p id="book-time-hint" aria-live="polite" className="mt-1.5 text-xs text-inkmuted">
+                              Open {fmtMinutes(dayHours[0])} – {fmtMinutes(dayHours[1])} on the selected day. Slots outside these hours are unavailable.
+                            </p>
+                          ) : (
+                            <p id="book-time-hint" className="mt-1.5 text-xs text-inkmuted">Optional — final slot is confirmed by phone.</p>
+                          )}
                         </div>
                       </div>
 

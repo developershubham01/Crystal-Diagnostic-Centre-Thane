@@ -36,6 +36,15 @@ export async function GET(req: NextRequest) {
   const statusCounts: Record<string, number> = {};
   for (const g of byStatus) statusCounts[g.status] = g._count.status;
 
+  // Most requested tests/packages (top 5 by booking count)
+  const byTest = await db.appointmentRequest.groupBy({
+    by: ["testOrPackage"],
+    _count: { testOrPackage: true },
+    orderBy: { _count: { testOrPackage: "desc" } },
+    take: 5,
+  });
+  const topTests = byTest.map((g) => ({ name: g.testOrPackage, count: g._count.testOrPackage }));
+
   // Last 14 days trend for enquiries
   const recent = await db.appointmentRequest.findMany({
     where: { createdAt: { gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) } },
@@ -67,5 +76,6 @@ export async function GET(req: NextRequest) {
     galleryCount,
     statusCounts,
     trend,
+    topTests,
   });
 }
