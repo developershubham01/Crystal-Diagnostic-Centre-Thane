@@ -1,0 +1,272 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import {
+  CalendarClock,
+  ClipboardList,
+  Download,
+  ExternalLink,
+  HelpCircle,
+  Images,
+  Inbox,
+  MessageSquare,
+  Package,
+  Plus,
+  Sparkles,
+  Stethoscope,
+  TrendingUp,
+} from "lucide-react";
+import { api, type AppointmentDTO } from "@/lib/api-client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ListSkeleton, StatusBadge, TabHeader, fmtDate, fmtDateTime } from "@/components/admin/admin-shared";
+import type { AdminTabId } from "@/components/admin/AdminLayout";
+import { useRouterStore } from "@/lib/store";
+
+interface StatsDTO {
+  totalAppointments: number;
+  newAppointments: number;
+  weekAppointments: number;
+  totalMessages: number;
+  newMessages: number;
+  servicesCount: number;
+  packagesCount: number;
+  faqsCount: number;
+  galleryCount: number;
+  statusCounts: Record<string, number>;
+  trend: { date: string; count: number }[];
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  badge,
+  hint,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  badge?: string;
+  hint?: string;
+}) {
+  return (
+    <Card className="card-lift rounded-2xl border-brandborder bg-card p-0">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-soft text-medblue">{icon}</span>
+          {badge && (
+            <span className="rounded-full bg-teal-soft/60 px-2 py-0.5 text-[11px] font-bold text-teal-800">{badge}</span>
+          )}
+        </div>
+        <p className="mt-3 text-3xl font-extrabold tracking-tight text-ink">{value}</p>
+        <p className="mt-0.5 text-sm font-semibold text-inkmuted">{label}</p>
+        {hint && <p className="mt-1 text-xs text-inkmuted">{hint}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function TrendChart({ trend }: { trend: { date: string; count: number }[] }) {
+  const max = Math.max(1, ...trend.map((t) => t.count));
+  return (
+    <div>
+      <div className="flex h-36 items-end gap-1.5" role="img" aria-label="Appointment requests over the last 14 days">
+        {trend.map((t, i) => {
+          const pct = Math.round((t.count / max) * 100);
+          const isToday = i === trend.length - 1;
+          return (
+            <div key={t.date} className="group relative flex h-full flex-1 flex-col justify-end">
+              <div
+                className={`w-full rounded-t-md transition-all group-hover:opacity-80 ${
+                  isToday ? "bg-teal" : "bg-medblue/70"
+                }`}
+                style={{ height: `${Math.max(pct, t.count > 0 ? 8 : 3)}%` }}
+                title={`${fmtDate(t.date)} — ${t.count} request${t.count === 1 ? "" : "s"}`}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex justify-between text-[10px] font-semibold text-inkmuted">
+        <span>{fmtDate(trend[0]?.date)}</span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2 w-2 rounded-full bg-medblue/70" aria-hidden /> last 14 days
+          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-teal" aria-hidden /> today
+        </span>
+        <span>{fmtDate(trend[trend.length - 1]?.date)}</span>
+      </div>
+    </div>
+  );
+}
+
+export function OverviewTab({ onNavigate }: { onNavigate: (tab: AdminTabId) => void }) {
+  const navigate = useRouterStore((s) => s.navigate);
+
+  const stats = useQuery<StatsDTO>({
+    queryKey: ["admin-stats"],
+    queryFn: () => api.get<StatsDTO>("/api/admin/stats"),
+    refetchInterval: 60_000,
+  });
+
+  const recent = useQuery<AppointmentDTO[]>({
+    queryKey: ["overview-recent-appointments"],
+    queryFn: () => api.get<AppointmentDTO[]>("/api/appointments"),
+  });
+
+  const s = stats.data;
+  const recentAppointments = recent.data?.slice(0, 5) ?? [];
+
+  return (
+    <div>
+      <TabHeader
+        title="Dashboard Overview"
+        description="A live snapshot of appointment requests, messages and website content. All figures are demo data until real requests arrive."
+      />
+
+      {stats.isLoading ? (
+        <ListSkeleton rows={6} />
+      ) : stats.isError || !s ? (
+        <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-0">
+          <CardContent className="p-5 text-sm font-medium text-destructive">
+            Could not load dashboard statistics. Please refresh the page.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {/* Stat cards */}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              icon={<ClipboardList className="h-5 w-5" aria-hidden />}
+              label="Total appointment requests"
+              value={s.totalAppointments}
+              badge={s.newAppointments > 0 ? `${s.newAppointments} new` : undefined}
+            />
+            <StatCard
+              icon={<CalendarClock className="h-5 w-5" aria-hidden />}
+              label="Requests this week"
+              value={s.weekAppointments}
+              hint="Last 7 days"
+            />
+            <StatCard
+              icon={<MessageSquare className="h-5 w-5" aria-hidden />}
+              label="Contact messages"
+              value={s.totalMessages}
+              badge={s.newMessages > 0 ? `${s.newMessages} new` : undefined}
+            />
+            <StatCard
+              icon={<Inbox className="h-5 w-5" aria-hidden />}
+              label="Requests awaiting action"
+              value={s.statusCounts["NEW"] ?? 0}
+              hint="Status NEW — needs a first call"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard icon={<Stethoscope className="h-5 w-5" aria-hidden />} label="Services" value={s.servicesCount} />
+            <StatCard icon={<Package className="h-5 w-5" aria-hidden />} label="Health packages" value={s.packagesCount} />
+            <StatCard icon={<HelpCircle className="h-5 w-5" aria-hidden />} label="FAQs" value={s.faqsCount} />
+            <StatCard icon={<Images className="h-5 w-5" aria-hidden />} label="Gallery images" value={s.galleryCount} />
+          </div>
+
+          {/* Trend + status breakdown */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="rounded-2xl border-brandborder bg-card p-0 lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base font-extrabold text-ink">
+                  <TrendingUp className="h-4 w-4 text-medblue" aria-hidden />
+                  Appointment requests — last 14 days
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 pt-0">
+                <TrendChart trend={s.trend} />
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-brandborder bg-card p-0">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-extrabold text-ink">Requests by status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2.5 p-5 pt-0">
+                {["NEW", "CONTACTED", "SCHEDULED", "COMPLETED", "CANCELLED"].map((status) => (
+                  <div key={status} className="flex items-center justify-between">
+                    <StatusBadge status={status} />
+                    <span className="text-sm font-extrabold text-ink">{s.statusCounts[status] ?? 0}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent requests */}
+          <Card className="rounded-2xl border-brandborder bg-card p-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-extrabold text-ink">Latest appointment requests</CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 pt-0">
+              {recent.isLoading ? (
+                <ListSkeleton rows={3} />
+              ) : recentAppointments.length === 0 ? (
+                <p className="py-6 text-center text-sm text-inkmuted">
+                  No appointment requests yet — new requests will appear here.
+                </p>
+              ) : (
+                <ul className="divide-y divide-brandborder">
+                  {recentAppointments.map((a) => (
+                    <li key={a.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-ink">
+                          {a.name} <span className="font-normal text-inkmuted">· {a.testOrPackage}</span>
+                        </p>
+                        <p className="text-xs text-inkmuted">
+                          {fmtDateTime(a.createdAt)}
+                          {a.preferredDate ? ` · prefers ${fmtDate(a.preferredDate)}` : ""}
+                          {a.preferredTime ? ` · ${a.preferredTime}` : ""}
+                        </p>
+                      </div>
+                      <StatusBadge status={a.status} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Quick actions */}
+          <div>
+            <p className="eyebrow mb-3 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              Quick actions
+            </p>
+            <div className="flex flex-wrap gap-2.5">
+              <Button className="rounded-xl" onClick={() => onNavigate("appointments")}>
+                <ClipboardList className="h-4 w-4" aria-hidden />
+                Review Requests
+              </Button>
+              <Button variant="outline" className="rounded-xl" onClick={() => onNavigate("messages")}>
+                <MessageSquare className="h-4 w-4" aria-hidden />
+                Open Messages
+              </Button>
+              <Button variant="outline" className="rounded-xl" onClick={() => onNavigate("services")}>
+                <Plus className="h-4 w-4" aria-hidden />
+                Manage Services
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}
+              >
+                <Download className="h-4 w-4" aria-hidden />
+                Export Requests (CSV)
+              </Button>
+              <Button variant="outline" className="rounded-xl" onClick={() => navigate("#/")}>
+                <ExternalLink className="h-4 w-4" aria-hidden />
+                View Site
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

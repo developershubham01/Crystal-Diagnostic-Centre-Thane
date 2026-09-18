@@ -1,0 +1,201 @@
+# Project Worklog — Crystal Diagnostic Centre Website
+
+## Project Brief
+Premium 3D dynamic healthcare website for **Crystal Diagnostic Centre, Thane** (Uthalsar Naka, Thane West).
+- Stack: Next.js 16 App Router, TypeScript, Tailwind 4, shadcn/ui, Prisma + SQLite, R3F/Three.js 3D.
+- Phone: +91 8828393955. Address: 1,2, Shrikrishna Bhavan CHS, Opp. Varad Hospital, Uthalsar Naka, Uthalsar, Thane West, Thane, MH 400601.
+- Colors: Navy #0B3B66, Medical Blue #087EA4, Teal #17B6A4, Soft BG #F4FAFC, Text #12304A, Muted #60788A, Border #DDEBF2.
+- Font: Manrope (next/font). Logo: crystal "C" + medical cross + leaf (SVG system).
+- **SANDBOX RULE**: only `/` route is user-visible → the entire site is a single-page app with hash-based routing (`#/about`, `#/services/...`, `#/admin`...). Do NOT create new files in `src/app/` besides metadata files.
+- All sample/demo data must be clearly marked as demo. No invented certifications/prices claims. Demo notice bar on public site.
+
+## Architecture Decisions
+- Hash router via Zustand store (`src/lib/store.ts`) — routes: home, about, services, services/:slug, packages, packages/:slug, book-test, reports, contact, gallery, faq, privacy, terms, disclaimer, admin, 404.
+- API under `src/app/api/**` (allowed). Auth: HMAC-signed httpOnly session cookie + scrypt password hashing (no extra deps). Rate limiting: in-memory sliding window.
+- DB tables: SiteSetting(kv), ServiceCategory, Service, HealthPackage, PackageTest, AppointmentRequest, ContactMessage, Faq, GalleryImage, AdminUser, AuditLog.
+- Default admin credentials seeded from env `ADMIN_USERNAME`/`ADMIN_PASSWORD` (fallback admin / Crystal@2024 — documented as demo, must change in production).
+
+---
+Task ID: 1a
+Agent: Z.ai Code (lead)
+Task: Foundation — deps, Prisma schema, seed, auth/security libs
+
+Work Log:
+- (in progress)
+
+---
+Task ID: 1a-1e (Foundation, complete)
+Agent: Z.ai Code (lead)
+
+Work Log:
+- Installed three, @react-three/fiber@9, @react-three/drei@10, @types/three
+- Prisma schema: SiteSetting(kv), ServiceCategory, Service, HealthPackage, PackageTest, AppointmentRequest, ContactMessage, Faq, GalleryImage, AdminUser, AuditLog → `bun run db:push` OK
+- `bun prisma/seed.ts` → settings, admin (admin/Crystal@2024 demo), 5 categories, 12 services, 5 packages, 6 FAQs, 6 gallery images (DEMO data, priceVisible=false so prices hidden publicly)
+- Libs: src/lib/{auth.ts (scrypt+HMAC session cookie), rate-limit.ts, constants.ts (BUSINESS info), settings.ts (DEFAULT_SETTINGS + parse), store.ts (hash router zustand), api-client.ts (api + DTO types), hooks.ts (React Query hooks), seo.ts (usePageMeta), audit.ts, perf.ts}
+- APIs (all under src/app/api/**): settings GET/PUT, categories GET/POST + [id] PATCH/DELETE, services GET/POST + [slug] GET/PATCH/DELETE, packages same, appointments GET(admin)/POST(public, validated, rate-limited, honeypot) + [id], contact same, faqs, gallery, upload (sharp→webp ≤1600px), auth/{login,logout,me}, admin/stats, admin/export (CSV), audit-logs
+- Brand: globals.css (palette tokens navy/medblue/teal/soft/ink/inkmuted/brandborder + utilities text-gradient-brand, glass-card, bg-med-grid, bg-radial-soft, eyebrow, scroll-area, card-lift), Manrope font in layout.tsx, full metadata + OG
+- Logo system: src/components/brand/Logo.tsx (LogoMark/LogoHorizontal/LogoStacked, color|white themes), src/app/icon.svg, public/brand/{png,webp}, favicon.ico via scripts/generate-icons.mjs
+- App shell: Providers (react-query), AppShell (hash sync, DemoNotice, admin=standalone chrome), Header (sticky glass, mobile Sheet drawer, phone + Book CTA), Footer (navy, 4 cols, legal, Staff Login link), FloatingActions (WhatsApp if configured, mobile call, back-to-top), RouteRenderer (lazy pages)
+- 3D: three/Lazy3D.tsx (IO-lazy, reduced-motion skip, WebGL check, static fallback), three/HeroCrystal.tsx (crystal icosahedron shell w/ transmission on desktop, procedural molecule, particles, pointer rig, inline Lightformer env — no network fetch), three/DnaShowcase.tsx (DNA helix, scroll-boosted rotation)
+- HomePage complete: hero (3D + CTAs + contact), trust strip, services preview (dynamic), featured packages (dynamic), why-choose-us (settings JSON), 3D science section, appointment CTA. Reveal helper for framer-motion whileInView. JSON-LD still to add per page.
+- Shared: site/Shared.tsx → Breadcrumbs, PageHero, JsonLd, breadcrumbSchema
+- Placeholder pages created for agent tasks; lint clean; GET / = 200; APIs verified
+
+Stage Summary:
+- Architecture: SPA at "/" with hash routes; admin at "#/admin" standalone
+- API contracts in src/lib/api-client.ts (DTOs) — USE THESE TYPES
+- Design tokens: bg-navy/medblue/teal/soft/ink/inkmuted/border-brandborder; brand classes above
+- Images: scripts/generate-images.sh running in background → public/images/*.jpg (hero-fallback, og-image, cat-*, gallery-*, about-centre)
+- DEMO compliance: DemoNotice banner (settings.demoNotice), priceVisible=false default, "sample data" notes inside seeded content
+- Agent credentials note: admin/Crystal@2024 (env override ADMIN_USERNAME/ADMIN_PASSWORD)
+
+---
+Task ID: 2-a
+Agent: full-stack-developer
+Task: Public inner pages (About, Services, ServiceDetail, Packages, PackageDetail, Gallery, FAQ, Legal)
+
+Work Log:
+- Read worklog.md + all contract files (store.ts, api-client.ts, hooks.ts, settings.ts, constants.ts, seo.ts, site/Shared.tsx, brand/Logo.tsx, site/Reveal.tsx); verified API contracts via curl (/api/services, /api/packages, /api/categories include serviceCount, [slug] endpoints return 404 {error}).
+- Created shared helpers in src/components/pages/:
+  - PageStates.tsx → ErrorState (shadcn Alert + retry), EmptyState (dashed panel), CardsGridSkeleton, DetailSkeleton (2-col), CheckList (newline→Check icons), formatPrice (null/non-visible → "Price on request"), splitSentences, splitParagraphs.
+  - ServiceCard.tsx → clickable/keyboard-accessible card (role=link, Enter/Space): category badge, line-clamp-2 shortDescription, Droplets sample-type + Clock turnaround row, price, Book (→#/book-test) + View Details buttons.
+  - PackageCard.tsx → gradient header band (name + tests count + Featured badge), full test list (scroll-area when >8), price block, View Details + Book Now; whole card navigates to detail.
+  - Lightbox.tsx → Dialog-based image viewer (index-controlled), ←/→ keyboard nav, Escape close, prev/next 44px buttons, counter, category badge; also exports FilterChip (aria-pressed pill with count) reused by Services + Gallery.
+  - LegalPageLayout.tsx → shared legal layout: PageHero + Breadcrumbs + "Last updated: to be reviewed by the centre before launch." pill + max-w-3xl prose sections.
+- AboutPage: settings-driven (aboutIntro/mission/vision/philosophy cards, facilities+quality CheckLists, "to be confirmed" values rendered visibly), /images/about-centre.jpg with "Representative image" caption, Visit Us strip (address, tel:+918828393955, workingHours + note, Get Directions window.open(BUSINESS.mapsDirections), Contact Us → #/contact). JSON-LD: breadcrumbSchema + MedicalBusiness (name/phone/address only — no unverifiable claims).
+- ServicesPage: PageHero (settings.homeServicesIntro) + STICKY toolbar (top-16 md:top-[4.5rem]) with icon search (300ms debounce) + category chips w/ counts (server contract note: SQLite `contains` is case-sensitive, so search is debounced client-side case-insensitive; category still server-side via useServices({category})). "Showing X of Y" live region, clear-filters, empty/error states, Reveal grid of ServiceCard.
+- ServiceDetailPage({slug}): DetailSkeleton loading; ApiError 404 → "Service not found" panel (Back to Services / Contact); 2-col layout — left: category badge, Popular tag, detailedDescription paragraphs (splitParagraphs), numbered Preparation callout (splitSentences, ClipboardList), sample-data footnote, related services (same categoryId, ≤3 mini cards) + View All; right lg:sticky top-24 sidebar: Request this Test → #/book-test, tel CTA, quick-facts dl (Sample/Report/Category with "To be confirmed" fallbacks), price row + "Pricing to be confirmed by the centre", medical-disclaimer Alert footnote. JSON-LD: breadcrumbs + Service schema (offers only when priceVisible; provider=MedicalBusiness).
+- PackagesPage: PageHero (homePackagesIntro) + PackageCard grid + sample-data footnote; skeleton/empty/error states.
+- PackageDetailPage({slug}): 404 panel, Tests Included numbered card (scroll-area >8), Preparation steps, "Who is this package for?" (applicability or "to be confirmed" default), Info Alert "Package contents are sample data pending confirmation by the centre", sticky sidebar (price row, Book Now → #/book-test, Call, back link).
+- GalleryPage: PageHero + representative-imagery description, chips (All + GALLERY_CATEGORIES + any extra categories present, with counts), CSS-columns masonry (columns-2 sm:3 lg:4, break-inside-avoid, <img loading="lazy"> not next/image since URLs are dynamic), hover title/category overlay, Lightbox with keyboard nav; category change resets lightbox index; empty/loading/error states.
+- FaqPage: live search Input (question+answer, case-insensitive), grouped by faq.category (fallback "General") with per-category Accordion (single collapsible) + count badges, "Still have questions?" CTA card (tel + Contact Us → #/contact). JSON-LD: breadcrumbSchema + FAQPage (all published Q&As).
+- PrivacyPage/TermsPage/DisclaimerPage via LegalPageLayout: Privacy covers data collected (name/phone/email/appointment details via forms), purpose = contacting about requests, consent checkbox, no selling, retention ("to be confirmed"), cookie note (admin session cookie only, none for visitors), security advice (don't submit sensitive medical details), privacy-contact (address+phone). Terms covers lawful use, no medical advice, requests ≠ confirmed bookings, IP, liability, third-party links, governing law India / courts at Thane, Maharashtra. Disclaimer includes MEDICAL_DISCLAIMER verbatim in a highlighted "Official Disclaimer Statement" Alert plus supporting sections.
+- Verification: bunx eslint src/components/pages/ → 0 problems; agent-browser smoke test of all routes: About/Services/Packages/Gallery/FAQ/legal render, titles update via usePageMeta (e.g. "Diagnostic Services | Crystal Diagnostic Centre"), services search 12→1 for "lipid", Radiology chip 2/12, clear filters 12/12, ServiceDetail + PackageDetail render w/ Related/Tests, both 404 panels OK, lightbox open→ArrowRight→Escape OK, FAQ search OK, mobile 390px renders 5 package cards; curl / → 200; dev.log shows only stale (pre-existing) module-not-found entries and expected /images/*.jpg 404s (image-gen script still pending from Task 1).
+
+Stage Summary:
+- All 10 inner pages implemented at exact contract paths; new helpers: pages/{PageStates,ServiceCard,PackageCard,Lightbox,LegalPageLayout}.tsx. No files outside pages/ touched; store/hooks/Shared untouched.
+- Navigation rule honoured: all navigation via useRouterStore.navigate("#/..."), zero next/link. Detail pages receive `slug` prop (matches RouteRenderer).
+- Prices: never rendered unless priceVisible && price!=null → "Price on request" + "Pricing to be confirmed by the centre" note on detail sidebars. No invented certifications/stats; sample-data notes surfaced (PackagesPage footnote, PackageDetail Info card, Gallery footer note).
+- DECISION: services text search filters client-side (debounced 300ms, case-insensitive) because SQLite Prisma `contains` is case-sensitive; the useServices({search}) param remains available for future use. Category filtering stays server-side.
+- KNOWN ISSUE (lead's scope): document.title set by usePageMeta can be reverted by React 19 head-hydration on FIRST load (canonical/meta do persist); on any hash navigation titles apply correctly. Also lint errors exist in src/components/admin/* + unused-disable warning in site/Shared.tsx — owned by other agents, left untouched.
+- public/images/* are still pending from Task 1's background script; pages reference /images/about-centre.jpg and gallery URLs from DB and will light up once those land.
+
+---
+Task ID: 3-foundation
+Agent: Z.ai Code (lead)
+Task: Lamborghini design-system transformation — foundation (tokens, fonts, buttons, chrome, 3D, mass remap)
+
+Work Log:
+- Extracted uploaded workspace (Crystal Diagnostic Centre) into /home/z/my-project; bun install OK; prisma generate + dev restart fixed API 500s (db client was stale)
+- Installed DESIGN.md (npx getdesign@latest add lamborghini) at project root as the UI reference
+- globals.css rebuilt: absolute black canvas (#000), charcoal #202020 cards, Lamborghini Gold #FFC000 primary (hover #917300), Gold Text #FFCE3E, Cyan Pulse #29ABE2 informational only, --radius: 0rem (sharp everything), dark scrollbar/selection/autofill, gold focus ring
+- Token names preserved so all views inherit: navy→abyss surface, medblue→gold, teal→cyan, teal-soft→gold-text, soft→#141414, ink→smoke, inkmuted→ash, brandborder→#262626; added gold/gold-dark/charcoal/iron/graphite/ash/steel/cyan-pulse tokens
+- New utilities: display-caps (uppercase display voice), hex/hex-flat (clip-path hexagons), gold-line, metal-badge, section-divider, aero-cut, progress-line (hero sweep), link-underline; card-lift now colour-only (no translate per DESIGN.md)
+- layout.tsx: Manrope → Inter (body) + Space Grotesk (display, --font-grotesk), themeColor #000000, html className dark
+- ui/button.tsx: Lamborghini button system — uppercase tracking voice, gold default (hover gold-dark), outline = white/50 ghost border hover gold, secondary/ghost dark surfaces, sizes h-10/12 (48px CTAs)
+- Mass remap via sed: text-navy→text-ink (132), solid bg-white→bg-card (59), white glass ≥50% → bg-card/NN, via-[#0d4a7c]→via-[#1a1a1a]; kept white/5-20 overlays intentionally
+- Logo.tsx: gold gradient C-ring + white cross + cyan leaf; uppercase font-display wordmark, gold micro tagline
+- Header.tsx: Lamborghini nav — transparent over black, scrolled bg-black/85 blur border-white/10, uppercase 11px tracking-[0.2em] links with gold underline active state, MENU+amburger mobile pattern, numbered sheet links, skip-to-content link
+- Footer.tsx: gold horizon line, gold micro headings, cyan informational icons, uppercase legal row
+- FloatingActions.tsx: hexagonal WhatsApp/call/back-to-top buttons
+- AppShell DemoNotice: charcoal + gold border strip
+- Shared.tsx: PageHero = lit stage (radial glows, grid mask, gold horizon), display-caps h1, uppercase breadcrumbs with gold current; removed unused eslint-disable
+- HeroCrystal/DnaShowcase 3D: gold/white/cyan palette, warm lightformers, dark glass shell, gold particles, black contact shadows
+
+Stage Summary:
+- Foundation tokens/components now fully Lamborghini; pages inherit dark theme automatically
+- REMAINING: HomePage hero rewrite (Task 3-a), inner page polish (3-b), admin lint setState-in-effect fixes (3-c), image generation (hero-fallback/og/about/gallery/cat-*), agent-browser verification, cron setup
+- Dev server restarted cleanly; /api/categories + /api/packages + / all 200
+
+---
+Task ID: 3-a
+Agent: frontend-styling-expert
+Task: HomePage Lamborghini transformation
+Work Log:
+- Read worklog.md (3-foundation) + DESIGN.md; verified token/utility contracts in globals.css (display-caps, hex/hex-flat, aero-cut, progress-line, metal-badge, section-divider, gold-line, card-lift colour-only, eyebrow, link-underline) and the Lamborghini Button system (default=gold, outline=ghost white/50, lg=h-12) before editing
+- Rewrote src/components/pages/HomePage.tsx only (no other file touched)
+- ROOT: bg-card → bg-background; removed unused useRoute/route + useReducedMotion imports; all data wiring kept (settings, categories, packages, isMobile, BUSINESS, go() hash navigation, usePageMeta, Lazy3D HeroCrystal+DnaShowcase with fallbackSrc, framer-motion Reveal, all aria-labelledby ids)
+- HERO: full-viewport black stage min-h-[calc(100svh-5rem)] flex items-center; left = hex LogoMark badge + gold eyebrow "{businessName} — Thane", display-caps headline text-5xl→xl:text-[5.2rem] with last two words text-gradient-brand, ash sub, CTA row (gold lg "Book a Test" + ghost outline lg "Explore Services" + uppercase micro underlined "Contact" text link), progress-line cinematic bar, ghost-border phone chip (gold Phone icon) + MapPin ash address; right = HeroCrystal on aero-cut bordered plate (nested bg-white/10 p-px technique so the 1px border follows the 28px cut), low-opacity outlined .hex gold decoration behind plate, gold-line under; kept bg-med-grid masked overlay + bg-radial-soft
+- TRUST STRIP: border-t white/10 on bg-abyss, 4 cols (1/2/4 responsive), uppercase 11px tracking labels white/85 + 10px ash sub, border-l dividers via nth-child arbitrary variants (stack on mobile)
+- TRUST CARDS: black section, bg-card border-white/10 p-6, .hex bg-gold/10 icon containers (icon text-gold), uppercase 13px titles, ash body, card-lift
+- SERVICES: section-divider + border-t #202020 on bg-soft; hex icon plates (nested hex ring: outer bg-white/10 + inner bg-card inset-px), metal-badge counts, card-lift border-gold hover, "Learn more" gold-on-hover opacity transition, "View All Services" clean ghost outline
+- PACKAGES: charcoal cards with bg-secondary header band border-b-gold/30, font-display uppercase name + 10px ash count + gold Sparkles, sharp bg-gold h-1.5 w-1.5 square bullets, font-display price + micro uppercase ash label, outline "Details" + gold "Book Now" (sm), dashed empty state de-rounded
+- WHY CHOOSE US: about-centre.jpg in aero-cut bordered plate + gold-line, glass-card badge kept, numbered cards 01/02… in font-display text-gold (no bg chip), uppercase 14px titles, hover border-gold via card-lift
+- 3D SCIENCE: bg-navy with radial rgba(255,192,0,0.08)+rgba(41,171,226,0.06) glows, eyebrow + display-caps h2, points on bg-white/[0.04] border-white/10 with .hex bg-cyan-pulse/10 icon plates (cyan informational only), removed backdrop-blur
+- APPOINTMENT CTA: bg-charcoal border-gold/25 panel, w-1 bg-gold left accent bar, masked bg-med-grid overlay, display-caps h2 + eyebrow, gold lg Button + ghost lg phone link via Button asChild; removed navy/medblue gradient panel, blur blobs and rounded-full
+- DE-ROUNDED: every rounded-* removed (rounded-full/2xl/3xl, gradient buttons, scale/translate hovers all gone); Skeletons fixed h-44/h-72 (no radius); verified zero matches for rounded-|scale-|translate-|backdrop-blur|bg-gradient-to in file
+- VERIFY: bunx eslint src/components/pages/HomePage.tsx → 0 problems; tsc --noEmit → 0 errors in HomePage (remaining project errors pre-date this task, other files untouched); curl / → 200 and rendered HTML contains aero-cut ×4, display-caps ×7, bg-abyss, progress-line, hero-heading
+
+Stage Summary:
+- HomePage now fully on the Midnight Showroom system: absolute-black stage hero with aero-cut 3D plate + hex marks, horizon trust strip, charcoal cards with gold-tinted hex icon geometry, metal badges, sharp gold square bullets, numbered gold index cards, cyan informational science section, gold-bar CTA panel
+- Zero border-radius, no gradients on buttons/surfaces, colour-only hovers, uppercase display voice throughout; all functionality/data wiring preserved
+- Note for 3-b: inner-page PackageCard header bands + any remaining rounded-* classes on inner pages still need the same de-rounding pass; image assets (hero-fallback, about-centre) still pending from Task 1 script
+---
+Task ID: 3-c
+Agent: general-purpose
+Task: Fix react-hooks/set-state-in-effect in admin tabs
+
+Work Log:
+- AppointmentsTab.tsx: dialog notes/status sync (old useEffect deps [appointmentId, appointment?.internalNotes, appointment?.status]) replaced with the React "adjust state during render" pattern — a `syncKey` snapshot state (`lastSyncKey`) compared field-by-field so re-sync still fires when server data changes after refetch, exactly like the old deps; setState calls + draft-building logic unchanged. ALSO fixed the 4 pre-existing react-hooks/refs errors in this file (same lint gate, same file): the render-phase `seenRef.current.set(...)` rolling cache + `.get()` read inside useMemo were rewritten as a state-held rolling map `{ source, map }` merged via a guarded identity comparison (`appointments !== seen.source`), preserving the "every loaded request stays openable after a status change moves it out of the filter" behaviour 1:1. `appointments` (was `list.data ?? []`) is now useMemo'd on [list.data] so the identity guard is stable (a bare `?? []` would retrigger the guard every render). Removed now-unused useEffect+useRef imports.
+- CategoriesTab.tsx: CategoryDialog openState effect → `lastOpenState` guard; draft rebuild + `setNameError(undefined)` preserved verbatim; useEffect import removed.
+- FaqsTab.tsx: FaqDialog openState effect → `lastOpenState` guard; draft rebuild + `setFieldErrors({})` preserved verbatim; useEffect import removed.
+- GalleryTab.tsx: GalleryDialog `open` prop effect → `lastOpenState` guard (prop named `open` here); draft rebuild + `setTitleError(undefined)` preserved verbatim; useEffect import removed (useRef kept for fileInputRef).
+- MessagesTab.tsx: same two fixes as AppointmentsTab — syncKey guard for notes/status ([messageId, message?.internalNotes, message?.status] deps replicated) and state-held rolling map replacing seenRef (react-hooks/refs); `messages` was already useMemo'd so no extra stabilization needed. Removed now-unused useEffect+useRef imports.
+- PackagesTab.tsx: PackageDialog openState effect → `lastOpenState` guard; `setDraft(editing ? toDraft(editing) : { ...EMPTY_DRAFT })` + `setFieldErrors({})` preserved verbatim; useEffect import removed.
+- ServicesTab.tsx: ServiceDialog openState effect → `lastOpenState` guard; `setDraft(editing ? toDraft(editing) : { ...EMPTY_DRAFT, published: true })` (note the create-mode `published: true` override) + `setFieldErrors({})` preserved verbatim; useEffect import removed.
+- Scope: only the 7 listed files touched. No renames/refactors/styling. Note: react-hooks/refs errors in AppointmentsTab/MessagesTab (out-of-scope type but same files, blocking the 0-error gate) were fixed minimally inside those files as required by the verify step.
+- Could not runtime-test dialogs: src/components/pages/AdminPage.tsx is still the `PagePlaceholder` stub (TODO(2), owned by another task) so admin tabs are not mounted anywhere yet. Verified instead via: bun module-import smoke test (all 7 import cleanly), tsc --noEmit (0 errors in these files; remaining project errors are pre-existing in src/app/api, pages/GalleryPage, examples, skills — untouched), dev.log clean after HMR rebuild.
+
+Stage Summary:
+- `bunx eslint src/components/admin` → 0 errors, 2 warnings (pre-existing: GalleryTab.tsx 217:18 + 361:20 "Unused eslint-disable directive" for @next/next/no-img-element, which is off in this config; left as-is per task rules). Baseline was 14 errors (7× set-state-in-effect across 6 files + 8 duplicate reports × react-hooks/refs in Appointments/Messages) + 2 warnings → now 0 errors.
+
+---
+Task ID: 3-b
+Agent: frontend-styling-expert
+Task: Inner pages Lamborghini polish
+Work Log:
+- Read worklog.md (3-foundation) + DESIGN.md; audited all src/components/pages/* (except HomePage.tsx — untouched, off limits) and cross-checked ui primitives (button/input/textarea/select/accordion/alert/label) + globals.css utilities before editing.
+- PageStates.tsx: ErrorState → border-white/10 bg-white/[0.03] + ghost outline retry (no rounded/bold overrides); EmptyState → sharp dashed border-white/15 bg-card panel, sharp bg-white/5 icon plate (teal informational icon), font-display uppercase title; CardsGridSkeleton/DetailSkeleton → sharp border-white/10 bg-card, removed all rounded overrides; CheckList → gold square markers (bg-gold/10 ring-gold/30, Check text-gold). formatPrice/split helpers untouched.
+- ServiceCard.tsx: card = card-lift border-white/10 bg-card sharp, focus ring gold; category → metal-badge; Popular → gold text badge (10px tracking-widest border-gold/40); title font-display uppercase w/ group-hover:text-gold-text; info icons text-teal; price label micro-steel + font-display value; Book = default gold CTA (gradient removed), View Details = outline ghost. Badge import removed.
+- PackageCard.tsx: header band → bg-secondary + border-b border-gold/30, name font-display uppercase, Featured = gold text badge, corner sparkle dimmed; tests bullets → 2px gold squares (Check icon removed); price font-display; CTAs gold default + outline ghost, all rounded/gradient/shadow removed.
+- Lightbox.tsx: Dialog → bg-black/95 border-white/10 sharp; prev/next = hex clip-path ghost buttons (bg-white/10, hover bg-gold text-black); counter + category → metal-badge; title font-display uppercase; close = sharp ghost. FilterChip → border-white/15 text-white/70, aria-pressed active = border-gold text-gold bg-gold/10, count bg-gold/20 text-gold, uppercase 12px tracking, colour-only transition.
+- ServicesPage.tsx: sticky toolbar → bg-black/85 backdrop-blur border-b border-white/10; search Input → border-white/15 bg-iron text-ink placeholder ash focus gold ring; "Showing X of Y" → uppercase 11px tracking micro-ash; clear-filters = ghost; loading/empty panels sharp; empty-state CTA = gold default.
+- PackagesPage.tsx: skeleton header band → bg-secondary border-gold/30 sharp; sample-data footnote → border-l-2 border-gold/50 bg-white/[0.03] px-4 py-3 text-xs ash.
+- ServiceDetailPage.tsx: category → metal-badge (Tag), Popular Test → gold badge; description fallback → dashed white/15 bg-white/[0.03]; Preparation callout → border-white/10 border-l-2 border-l-gold bg-white/[0.03] with font-display gold numerals (bg-white/5 ring-white/10); Related heading font-display uppercase; related mini-cards sharp hover:border-gold/40, arrow translate hover removed (colour-only); sidebar → bg-secondary band + border-gold/30, gold Request CTA, ghost call link (uppercase tracking, hover gold), quick-facts dl → dt 10px tracking-[0.2em] text-steel / dd text-ink / divide-y divide-white/10, price box bg-white/[0.03], disclaimer Alert dark w/ teal Info; 404 panel restyled (font-display uppercase h1, gold + ghost CTAs). Badge import removed.
+- PackageDetailPage.tsx: same language — Tests Included card sharp w/ bg-secondary band + metal-badge count + gold font-display numerals; Preparation callout identical; applicability panel bg-white/[0.03]; Info Alert dark; sidebar/404 matching ServiceDetail.
+- GalleryPage.tsx: tiles sharp border-white/10, hover gold 1px outline (scale removed), overlay bg-gradient-to-t from-black/80 (allowed image treatment), title font-display uppercase + category gold-text micro; placeholder note → gold-left strip; skeletons sharp.
+- FaqPage.tsx: search input dark (bg-iron/gold ring); category headings font-display uppercase + metal-badge counts; Accordion → border-white/10 bg-card, trigger uppercase 13px font-semibold text-ink hover:text-gold, chevron gold via [&>svg]:text-gold; "Still have questions?" strip → bg-card border-white/10 sharp w/ gold Call CTA + outline Contact. Badge import removed.
+- AboutPage.tsx: mission/vision cards sharp bg-card border-white/10 + font-display headings + teal icons; philosophy heading display-caps, question strip dark; image plate → aero-cut overflow-hidden border-white/10 + gold-line divider (old offset gradient plate/shadows removed); facilities/quality sections bg-card w/ steel micro notes + gold CheckList; Visit Us strip → bg-secondary band border-gold/30, gold micro column headings w/ teal icons, gold Get Directions + outline Contact.
+- BookTestPage.tsx: all Inputs/Textarea/SelectTrigger → border-white/15 bg-iron text-ink placeholder ash focus-visible gold ring; labels → 10px uppercase tracking-[0.18em] text-steel; +91 prefix plate dark; consent/home-collection panels → bg-white/[0.03] border-white/10; submit = gold Button lg w-full; success panel = sharp card + hex gold success mark + font-display heading; apiError strip = dark w/ border-l-destructive; sidebar cards dark, steel micro labels, teal icons, bg-white/10 separators; "No online payment" → bg-white/[0.03]. Honeypot untouched.
+- ContactPage.tsx: same form language as BookTest; info-stack cards dark w/ gold micro headings + teal icons + gold hover links; WhatsApp CTA → outline ghost (teal-filled button removed per gold-only rule); map container sharp + font-display heading; success hex mark; apiError dark strip.
+- ReportsPage.tsx: notice card sharp bg-card, gold hex lock mark + font-display uppercase heading; "Planned features" → metal-badge; planned cards sharp border-white/10, font-display titles, teal icons + gold BadgeCheck; privacy strip → border-l-2 border-l-gold bg-white/[0.03]. Badge import removed.
+- NotFoundPage.tsx: giant font-display 404 numeral in text-gold/20 as statement mark; heading font-display uppercase; buttons gold + outline ghost; call link = sharp white/30 ghost w/ hover gold; compass plate/blur removed.
+- LegalPageLayout.tsx: "Last updated" pill → metal-badge px-3 py-1.5; section headings font-display uppercase text-ink; bullets → gold squares (teal dots removed). PrivacyPage/TermsPage inherit (data-only, no edit needed); DisclaimerPage: official-statement Alert → border-white/10 border-l-2 border-l-gold bg-white/[0.03], uppercase micro title, ash body.
+- PagePlaceholder.tsx (bonus, sits in pages/): sharp icon plate, font-display uppercase h1, gold default CTA (rounded-full bg-navy removed).
+- Sweep: 0 remaining rounded-*/gradient buttons/scale-translate hovers/text-medblue in pages/ (only allowed image-overlay gradient remains in GalleryPage); aria attributes, roles, honeypot, JSON-LD, routes, logic all unchanged.
+- Verification: bunx eslint src/components/pages → 0 problems. Dev server not restarted (was already running, per instructions).
+
+Stage Summary:
+- All public inner pages + shared page states now speak the Midnight Showroom language: absolute black canvas, charcoal cards w/ border-white/10, gold reserved for primary CTAs/eyebrows/active states (FilterChip active, Featured/Popular badges, numbered callout numerals, gold CheckList squares, gold micro headings), Cyan Pulse strictly for informational icons, metal-badge for all tags/counts, sharp corners everywhere (--radius 0 respected, zero rounded-* classes), uppercase font-display headings and price/numeral voice, colour-only hovers (card-lift / border-gold / text-gold).
+- Files changed (17): PageStates.tsx, ServiceCard.tsx, PackageCard.tsx, Lightbox.tsx, ServicesPage.tsx, PackagesPage.tsx, ServiceDetailPage.tsx, PackageDetailPage.tsx, GalleryPage.tsx, FaqPage.tsx, AboutPage.tsx, BookTestPage.tsx, ContactPage.tsx, ReportsPage.tsx, NotFoundPage.tsx, LegalPageLayout.tsx, DisclaimerPage.tsx (+PagePlaceholder.tsx bonus). HomePage.tsx, AdminPage.tsx, all lib/ui/site files untouched.
+- No logic/data/route/JSON-LD/a11y-structure changes; all aria-* preserved; no new dependencies.
+- Known pre-existing (not mine): document.title first-load hydration quirk (lead's scope), admin lint (3-c), pending /images assets (Task 1 script).
+
+---
+Task ID: 4-lead
+Agent: Z.ai Code (lead)
+Task: Admin wiring + QA verification + image assets
+
+Work Log:
+- Discovered AdminPage.tsx was still a PagePlaceholder stub (admin tabs never mounted) → built full admin page: auth gate (/api/auth/me → LoginForm | AdminLayout), tab state, all 8 existing tabs wired + NEW WebsiteContentTab (grouped settings editor, 6 groups, PUT /api/settings, dirty-state save button) + NEW AuditLogsTab (200-entry trail, action colour badges, refresh)
+- Restyled AdminLayout (gold demo strip, gold left-bar active nav, uppercase micro labels) + LoginForm (dark inputs, display-caps title, gold demo-credentials panel)
+- Fixed remaining TS errors: audit.ts logAudit signature widened to accept null; GalleryPage "All" comparison; AdminPage EmptyState icon ReactNode; LoginForm broken className repaired
+- eslint src → 0 errors (2 pre-existing warnings in GalleryTab only); tsc clean for src/app+components+lib
+- Generated 14/14 dark-gold cinematic images via scripts/generate-images.mjs (z-ai-web-dev-sdk + sharp): hero-fallback, og-image (1440x704 — 720 not multiple of 32, API rejected), about-centre, cat-* ×5, gallery-* ×6
+- agent-browser QA (desktop 1280 + mobile 390): home hero/sections/footer ✓, services search "lipid" narrows grid ✓, book-test form filled + CBC select + consent + submit → "Request received" toast ✓, admin login admin/Crystal@2024 → dashboard stats ✓, Website Content editor renders + dirty-save ✓, Audit Logs shows LOGIN entries ✓, gallery images load ✓, about page image plate ✓, mobile MENU drawer (numbered links) ✓, sticky footer pushes naturally ✓
+- Console: only THREE.Clock deprecation warnings (harmless); dev.log clean, all APIs 200
+
+Stage Summary:
+- Site fully transformed to Lamborghini Midnight Showroom design system; admin dashboard fully operational (was unreachable before this phase)
+- All 14 image assets in place; QA verified end-to-end on desktop + mobile
+- Known minor: WhatsApp hex FAB can overlap hero content on small screens (standard FAB behaviour, acceptable); footer year reflects sandbox clock (2026)

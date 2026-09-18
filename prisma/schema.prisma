@@ -1,0 +1,155 @@
+// Crystal Diagnostic Centre — Database Schema
+// SQLite + Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Key-value store for all editable site content (business info, hours, SEO, homepage sections)
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model ServiceCategory {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  icon        String? // lucide icon key
+  image       String?
+  sortOrder   Int       @default(0)
+  published   Boolean   @default(true)
+  services    Service[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Service {
+  id                  String          @id @default(cuid())
+  categoryId          String
+  category            ServiceCategory @relation(fields: [categoryId], references: [id])
+  name                String
+  slug                String          @unique
+  shortDescription    String?
+  detailedDescription String?
+  preparation         String?
+  sampleType          String?
+  turnaroundTime      String?
+  price               Float?
+  priceVisible        Boolean         @default(false)
+  image               String?
+  featured            Boolean         @default(false)
+  published           Boolean         @default(true)
+  seoTitle            String?
+  seoDescription      String?
+  sortOrder           Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model HealthPackage {
+  id                  String        @id @default(cuid())
+  name                String
+  slug                String        @unique
+  description         String?
+  detailedDescription String?
+  tests               PackageTest[]
+  price               Float?
+  priceVisible        Boolean       @default(false)
+  preparation         String?
+  applicability       String? // only when medically verified
+  image               String?
+  featured            Boolean       @default(false)
+  published           Boolean       @default(true)
+  sortOrder           Int           @default(0)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model PackageTest {
+  id        String        @id @default(cuid())
+  packageId String
+  package   HealthPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int           @default(0)
+}
+
+model AppointmentRequest {
+  id             String   @id @default(cuid())
+  name           String
+  mobile         String
+  email          String?
+  testOrPackage  String
+  preferredDate  String?
+  preferredTime  String?
+  homeCollection Boolean  @default(false)
+  message        String?
+  consent        Boolean  @default(false)
+  status         String   @default("NEW") // NEW | CONTACTED | SCHEDULED | COMPLETED | CANCELLED
+  internalNotes  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ContactMessage {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String
+  email         String?
+  subject       String?
+  message       String
+  consent       Boolean  @default(false)
+  status        String   @default("NEW") // NEW | CONTACTED | COMPLETED | CANCELLED
+  internalNotes String?
+  createdAt     DateTime @default(now())
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String?
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  title     String
+  category  String // Centre | Reception | Facilities | Equipment | Staff | Other
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("ADMIN") // ADMIN | EDITOR
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String?
+  adminName String?
+  action    String
+  entity    String?
+  entityId  String?
+  details   String?
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,308 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * CRYSTAL DIAGNOSTIC CENTRE — "Midnight Showroom" theme
+ * Design language: DESIGN.md (Lamborghini-inspired)
+ * - Absolute black (#000000) canvas, charcoal (#202020) surfaces
+ * - Lamborghini Gold (#FFC000) as the sole chromatic accent (CTAs only)
+ * - Cyan Pulse (#29ABE2) reserved for informational accents
+ * - Zero border-radius — sharp, architectural edges
+ * - Uppercase display typography, tight leading, dramatic scale range
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /*
+   * Brand palette (token names preserved from v1 so all views inherit;
+   * values re-tuned to the Lamborghini design system).
+   * navy        → abyss surface (deep sections, footer)
+   * medblue     → Lamborghini Gold  #FFC000 (CTAs, links, eyebrows)
+   * medblue-light / teal-soft → Gold Text #FFCE3E
+   * teal        → Cyan Pulse #29ABE2 (informational accent only)
+   * soft        → dark iron section background
+   * ink         → smoke text · inkmuted → ash text
+   * brandborder → charcoal hairline
+   */
+  --color-navy: #0a0a0a;
+  --color-navy-deep: #050505;
+  --color-medblue: #ffc000;
+  --color-medblue-light: #ffce3e;
+  --color-teal: #29abe2;
+  --color-teal-soft: #ffce3e;
+  --color-soft: #141414;
+  --color-ink: #f5f5f5;
+  --color-inkmuted: #7d7d7d;
+  --color-brandborder: #262626;
+
+  /* Extended Lamborghini tokens */
+  --color-gold: #ffc000;
+  --color-gold-text: #ffce3e;
+  --color-gold-dark: #917300;
+  --color-charcoal: #202020;
+  --color-iron: #181818;
+  --color-abyss: #000000;
+  --color-cyan-pulse: #29abe2;
+  --color-graphite: #494949;
+  --color-ash: #7d7d7d;
+  --color-steel: #969696;
+}
+
+:root {
+  --radius: 0rem;
+  --background: #000000;
+  --foreground: #f5f5f5;
+  --card: #202020;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
+  --primary: #ffc000;
+  --primary-foreground: #000000;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #7d7d7d;
+  --accent: #202020;
+  --accent-foreground: #ffffff;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --border: #262626;
+  --input: #3a3a3a;
+  --ring: #ffc000;
+  --chart-1: #ffc000;
+  --chart-2: #ffce3e;
+  --chart-3: #917300;
+  --chart-4: #29abe2;
+  --chart-5: #969696;
+  --sidebar: #141414;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #ffc000;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #202020;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #262626;
+  --sidebar-ring: #ffc000;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+  /* Display headings speak in the brand voice: uppercase, tight, regular weight */
+  h1, h2, h3 {
+    font-family: var(--font-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+  /* Accessible focus states — gold ring on black */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-medblue;
+  }
+  /* Custom scrollbar — darkness with a gold cue */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #333333;
+    border-radius: 0;
+    border: 2px solid #0a0a0a;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ffc000;
+  }
+  ::selection {
+    background: #ffc000;
+    color: #000000;
+  }
+  /* Sharp input corners + dark autofill */
+  input, textarea, select {
+    border-radius: 0;
+  }
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #141414 inset;
+    -webkit-text-fill-color: #f5f5f5;
+    caret-color: #ffc000;
+  }
+}
+
+@layer utilities {
+  /* Brand gradient text — molten gold */
+  .text-gradient-brand {
+    background: linear-gradient(100deg, #ffce3e 0%, #ffc000 45%, #917300 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Dark glass card — charcoal plate floating over the abyss */
+  .glass-card {
+    background: rgba(24, 24, 24, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  /* Precision engineering grid — white lines on darkness */
+  .bg-med-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+  .bg-radial-soft {
+    background:
+      radial-gradient(60% 55% at 78% 18%, rgba(255, 192, 0, 0.07) 0%, transparent 60%),
+      radial-gradient(55% 60% at 12% 80%, rgba(41, 171, 226, 0.05) 0%, transparent 62%),
+      #000000;
+  }
+  /* Thin section eyebrow label — gold micro type */
+  .eyebrow {
+    @apply text-[11px] font-semibold tracking-[0.28em] uppercase text-medblue;
+  }
+  /* Scroll area with styled scrollbar (long lists) */
+  .scroll-area {
+    max-height: 24rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #333333 #0a0a0a;
+  }
+  /* Card hover — colour-only interaction (no scale/translate per DESIGN.md) */
+  .card-lift {
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card-lift:hover {
+    background-color: #242424;
+    border-color: rgba(255, 192, 0, 0.45);
+    box-shadow: 0 0 0 1px rgba(255, 192, 0, 0.12), 0 24px 48px -24px rgba(0, 0, 0, 0.9);
+  }
+  /* Uppercase display voice */
+  .display-caps {
+    font-family: var(--font-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.96;
+    font-weight: 500;
+  }
+  /* Hexagonal clip — brand geometry for signature UI marks */
+  .hex {
+    clip-path: polygon(25% 3.5%, 75% 3.5%, 100% 50%, 75% 96.5%, 25% 96.5%, 0% 50%);
+  }
+  .hex-flat {
+    clip-path: polygon(3.5% 25%, 50% 0%, 96.5% 25%, 96.5% 75%, 50% 100%, 3.5% 75%);
+  }
+  /* Gold hairline divider */
+  .gold-line {
+    background: linear-gradient(90deg, transparent 0%, #ffc000 50%, transparent 100%);
+    height: 1px;
+  }
+  /* Metallic badge (Lamborghini tag: bg #969696, 10px, radius 2px) */
+  .metal-badge {
+    @apply inline-flex items-center gap-1 bg-steel/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-steel;
+    border-radius: 2px;
+  }
+  /* Section divider — 1px charcoal bottom border on the black canvas */
+  .section-divider {
+    border-bottom: 1px solid #202020;
+  }
+  /* Angled edge — 12° aero cut for hero media panels */
+  .aero-cut {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%);
+  }
+  /* Underlined link in the Lamborghini news-card style */
+  .link-underline {
+    @apply text-foreground underline decoration-1 underline-offset-4 transition-colors;
+  }
+  .link-underline:hover {
+    @apply text-medblue;
+  }
+  /* Thin progress line used under hero sections */
+  .progress-line {
+    position: relative;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+  .progress-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 36%;
+    background: #ffc000;
+    animation: progress-sweep 6s ease-in-out infinite;
+  }
+  @keyframes progress-sweep {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
+  }
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 3D canvas container should never capture text selection */
+.canvas-wrap {
+  touch-action: pan-y;
+  user-select: none;
+}
