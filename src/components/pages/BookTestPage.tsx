@@ -23,6 +23,7 @@ import { useServices, usePackages } from "@/lib/hooks";
 import { BUSINESS } from "@/lib/constants";
 import { Breadcrumbs, JsonLd, PageHero, breadcrumbSchema, type Crumb } from "@/components/site/Shared";
 import { Reveal } from "@/components/site/Reveal";
+import { TrackerQr } from "@/components/site/TrackerQr";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -270,32 +271,37 @@ export function BookTestPage() {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">
                           Your tracking reference
                         </p>
-                        <div className="mt-2 flex items-center justify-between gap-3">
-                          <span className="font-mono text-lg font-bold tracking-[0.22em] text-gold-text">{reference}</span>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              try {
-                                await navigator.clipboard.writeText(reference);
-                                setCopied(true);
-                                setTimeout(() => setCopied(false), 2500);
-                              } catch {
-                                /* clipboard unavailable — reference remains visible */
-                              }
-                            }}
-                            className="border border-white/20 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:border-gold/60 hover:text-gold"
-                            aria-live="polite"
-                          >
-                            {copied ? "Copied" : "Copy"}
-                          </button>
+                        <div className="mt-2 flex items-center gap-4">
+                          <TrackerQr reference={reference} size={88} label="Scan to track" className="shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="font-mono text-lg font-bold tracking-[0.22em] text-gold-text">{reference}</span>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await navigator.clipboard.writeText(reference);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2500);
+                                  } catch {
+                                    /* clipboard unavailable — reference remains visible */
+                                  }
+                                }}
+                                className="border border-white/20 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:border-gold/60 hover:text-gold"
+                                aria-live="polite"
+                              >
+                                {copied ? "Copied" : "Copy"}
+                              </button>
+                            </div>
+                            <p className="mt-2 text-xs leading-relaxed text-ash">
+                              Save this code — you can track your request status anytime with it and your mobile number.
+                            </p>
+                            <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("#/track")}>
+                              <Search className="h-4 w-4" aria-hidden />
+                              Track Your Request
+                            </Button>
+                          </div>
                         </div>
-                        <p className="mt-2 text-xs leading-relaxed text-ash">
-                          Save this code — you can track your request status anytime with it and your mobile number.
-                        </p>
-                        <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("#/track")}>
-                          <Search className="h-4 w-4" aria-hidden />
-                          Track Your Request
-                        </Button>
                       </div>
                     )}
 

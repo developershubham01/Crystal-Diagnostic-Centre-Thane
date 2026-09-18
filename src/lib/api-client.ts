@@ -112,6 +112,16 @@ export interface GalleryImageDTO {
   published: boolean;
 }
 
+export interface TestimonialDTO {
+  id: string;
+  name: string;
+  area: string | null;
+  rating: number; // 1..5
+  text: string;
+  sortOrder: number;
+  published: boolean;
+}
+
 export interface AppointmentDTO {
   id: string;
   reference: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { api, type CategoryDTO, type FaqDTO, type GalleryImageDTO, type PackageDTO, type ServiceDTO } from "./api-client";
+import { api, type CategoryDTO, type FaqDTO, type GalleryImageDTO, type PackageDTO, type ServiceDTO, type TestimonialDTO } from "./api-client";
 import { DEFAULT_SETTINGS, parseSettings, type SiteSettings } from "./settings";
 
 /** React Query hooks for public dynamic content. */
@@ -79,6 +79,14 @@ export function useGallery() {
   return useQuery<GalleryImageDTO[]>({
     queryKey: ["gallery"],
     queryFn: () => api.get<GalleryImageDTO[]>("/api/gallery"),
+    staleTime: 60_000,
+  });
+}
+
+export function useTestimonials() {
+  return useQuery<TestimonialDTO[]>({
+    queryKey: ["testimonials"],
+    queryFn: () => api.get<TestimonialDTO[]>("/api/testimonials"),
     staleTime: 60_000,
   });
 }

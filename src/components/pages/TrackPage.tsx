@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Reveal } from "@/components/site/Reveal";
+import { TrackerQr } from "@/components/site/TrackerQr";
 
 const CRUMBS: Crumb[] = [{ label: "Track Request" }];
 
@@ -315,6 +316,14 @@ export function TrackPage() {
                         <dd className="mt-1 text-sm text-ink">{fmtDateTime(result.updatedAt)}</dd>
                       </div>
                     </dl>
+
+                    <div className="mt-8 flex flex-wrap items-center gap-6 border-t border-white/10 pt-6">
+                      <TrackerQr reference={result.reference} size={92} label="Scan on another device" />
+                      <p className="max-w-xs text-xs leading-relaxed text-inkmuted">
+                        Show this code at the front desk or scan it with a phone to open the tracker
+                        pre-filled — no typing needed.
+                      </p>
+                    </div>
 
                     <div className="mt-8 flex flex-wrap gap-3">
                       {result.status === "SCHEDULED" && result.preferredDate && (

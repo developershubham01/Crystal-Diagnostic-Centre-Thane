@@ -29,6 +29,7 @@ import { ServicesTab } from "@/components/admin/ServicesTab";
 import { CategoriesTab } from "@/components/admin/CategoriesTab";
 import { PackagesTab } from "@/components/admin/PackagesTab";
 import { FaqsTab } from "@/components/admin/FaqsTab";
+import { TestimonialsTab } from "@/components/admin/TestimonialsTab";
 import { GalleryTab } from "@/components/admin/GalleryTab";
 import {
   EmptyState,
@@ -323,6 +324,8 @@ function renderTab(tab: AdminTabId, onNavigate: (t: AdminTabId) => void) {
       return <PackagesTab />;
     case "faqs":
       return <FaqsTab />;
+    case "testimonials":
+      return <TestimonialsTab />;
     case "gallery":
       return <GalleryTab />;
     case "content":

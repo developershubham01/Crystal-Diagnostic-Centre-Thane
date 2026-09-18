@@ -469,6 +469,55 @@ async function seedGallery() {
   console.log(`✓ Seeded ${images.length} gallery images (representative imagery)`);
 }
 
+async function seedTestimonials() {
+  const existing = await db.testimonial.count();
+  if (existing > 0) {
+    console.log("• Testimonials already seeded, skipping");
+    return;
+  }
+  const testimonials = [
+    {
+      name: "Sample Patient — R. Kulkarni",
+      area: "Thane West",
+      rating: 5,
+      text: "Booked a full body checkup online and got a call back within the hour. The staff explained the fasting requirements clearly and the whole visit took less time than I expected.",
+      sortOrder: 10,
+    },
+    {
+      name: "Sample Patient — S. Mehta",
+      area: "Uthalsar",
+      rating: 5,
+      text: "Very convenient location near Uthalsar Naka. Sonography was done carefully and the technician explained each step. Reports came on WhatsApp the same evening.",
+      sortOrder: 20,
+    },
+    {
+      name: "Sample Patient — A. Shaikh",
+      area: "Thane",
+      rating: 4,
+      text: "Home collection for my mother's blood test was punctual and the phlebotomist was gentle and professional. Would have liked more evening slots, but overall a smooth experience.",
+      sortOrder: 30,
+    },
+    {
+      name: "Sample Patient — P. Deshpande",
+      area: "Thane West",
+      rating: 5,
+      text: "The tracker link with the reference code is a great idea — I could check the status of my request without calling. Transparent and stress-free.",
+      sortOrder: 40,
+    },
+    {
+      name: "Sample Patient — M. Joshi",
+      area: "Kalwa",
+      rating: 5,
+      text: "Clean centre, polite front desk and reasonable packages. The doctor reviewed my report and explained the next steps patiently. Recommended for routine tests.",
+      sortOrder: 50,
+    },
+  ];
+  for (const t of testimonials) {
+    await db.testimonial.create({ data: t });
+  }
+  console.log(`✓ Seeded ${testimonials.length} demo testimonials`);
+}
+
 async function main() {
   console.log("Seeding Crystal Diagnostic Centre database…");
   await seedSettings();
@@ -476,6 +525,7 @@ async function main() {
   await seedCatalog();
   await seedFaqs();
   await seedGallery();
+  await seedTestimonials();
   console.log("Seed complete.");
 }
 

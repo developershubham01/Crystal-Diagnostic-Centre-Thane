@@ -328,3 +328,26 @@
     filter: drop-shadow(0 0 7px rgba(59, 182, 239, 0.38)) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.22));
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Interaction detail — gold light sweep across primary CTAs on hover */
+/* (aero-premium cue; disabled automatically under reduced motion)    */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  .btn-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-130%) skewX(-18deg);
+    background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.32) 50%, transparent 68%);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .btn-sheen:hover::after {
+    transform: translateX(130%) skewX(-18deg);
+  }
+}

@@ -151,9 +151,13 @@ All buttons use **zero border-radius** — sharp, angular rectangles that echo t
 - **Dark gradient overlays**: Subtle darkening at top/bottom edges of video to ensure text legibility
 
 ### Distinctive Components
+
 - **Hexagonal Pause Button**: Video control uses a hexagonal outline (matching the brand's geometric DNA from the typeface), positioned bottom-right of hero sections
 - **Progress Bar**: Thin white line at bottom of hero sections indicating video/slide progress
 - **Badge/Tag**: bg `#969696`, text white, padding 8px, fontSize 10px, borderRadius 2px — tiny metallic pills
+- **CTA Light Sweep** (`.btn-sheen`): the primary gold button carries a diagonal white light sweep (32% → 50% → 32% gradient, skewX -18°, 0.7s ease-out) that crosses on hover — an aero-premium cue. Disabled automatically under `prefers-reduced-motion`.
+- **Reading-Progress Fill (back-to-top)**: the hexagonal back-to-top FAB fills from the bottom with `bg-gold/15` in proportion to page scroll (same 0..1 progress formula as the header hairline) and appears only after ~560px of scroll.
+- **Aero-Cut QR Frame** (`TrackerQr`): tracker QR codes render in a white scanner-safe tile framed by four 2px gold corner brackets (top-left/top-right/bottom-left/bottom-right), with an uppercase micro caption below.
 
 ## 5. Layout Principles
 
