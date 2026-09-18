@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarCheck, ClipboardList, Loader2, MapPin, Phone, Search, ShieldCheck } from "lucide-react";
+import { CalendarCheck, CalendarPlus, ClipboardList, Loader2, MapPin, Phone, Search, ShieldCheck } from "lucide-react";
 import { api, ApiError } from "@/lib/api-client";
 import { usePageMeta } from "@/lib/seo";
 import { BUSINESS } from "@/lib/constants";
+import { downloadAppointmentIcs } from "@/lib/calendar";
 import { Breadcrumbs, JsonLd, PageHero, breadcrumbSchema, type Crumb } from "@/components/site/Shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -259,9 +260,9 @@ export function TrackPage() {
                               )}
                               <span
                                 aria-hidden
-                                className={`relative z-10 mt-1 h-[15px] w-[15px] shrink-0 border ${
+                                className={`relative z-10 mt-1 h-[15px] w-[15px] shrink-0 border transition-colors ${
                                   current
-                                    ? "border-gold bg-gold"
+                                    ? "border-gold bg-gold shadow-[0_0_10px_rgba(255,192,0,0.45)]"
                                     : done
                                       ? "border-gold/60 bg-gold/40"
                                       : "border-white/25 bg-transparent"
@@ -271,6 +272,17 @@ export function TrackPage() {
                                 <p className={`text-[12px] font-bold uppercase tracking-[0.16em] ${done || current ? "text-ink" : "text-steel"}`}>
                                   {stage}
                                 </p>
+                                {/* stage stamps — known dates from the request record */}
+                                {i === 0 && (
+                                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-steel">
+                                    {fmtDateTime(result.createdAt)}
+                                  </p>
+                                )}
+                                {current && i > 0 && (
+                                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-steel">
+                                    Updated {fmtDateTime(result.updatedAt)}
+                                  </p>
+                                )}
                                 {current && <p className="mt-1 max-w-md text-[13px] leading-relaxed text-inkmuted">{meta.meaning}</p>}
                               </div>
                             </li>
@@ -305,6 +317,25 @@ export function TrackPage() {
                     </dl>
 
                     <div className="mt-8 flex flex-wrap gap-3">
+                      {result.status === "SCHEDULED" && result.preferredDate && (
+                        <Button
+                          variant="outline"
+                          className="border-gold/40 text-gold-text hover:bg-gold/10 hover:text-gold-text"
+                          onClick={() =>
+                            downloadAppointmentIcs({
+                              reference: result.reference,
+                              patientName: result.name,
+                              testOrPackage: result.testOrPackage,
+                              preferredDate: result.preferredDate as string,
+                              preferredTime: result.preferredTime,
+                              trackUrl: `${window.location.origin}/#/track?reference=${result.reference}`,
+                            })
+                          }
+                        >
+                          <CalendarPlus className="h-4 w-4" aria-hidden />
+                          Add to Calendar
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         onClick={() => {

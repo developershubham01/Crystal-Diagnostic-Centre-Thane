@@ -262,3 +262,23 @@ Stage Summary:
 - Baloo 2 added only for the brand lockup (--font-brand); body/display voices unchanged (Inter/Space Grotesk).
 - Old invented "gold C + cross" logo fully retired from all surfaces.
 - Risks/next: og-image badge tile is a plain square (could add rounded glass plate if wanted); print-slip SVG id="disc-print" is fine for single-instance slips; if the centre ever supplies a print-quality original (AI/PDF), swap the recreation for the source file.
+---
+Task ID: 8 (cron round)
+Agent: Z.ai Code (lead)
+Task: Patient calendar workflow + admin trend insight + print resilience + settings-driven hours + scroll progress detail
+
+Work Log:
+- STATUS ASSESSMENT: worklog reviewed (Tasks 1–7 complete incl. official logo round); all routes 200, all public APIs 200, dev.log clean, zero console errors → site stable, so this round = new features + noted-risk fixes (no bugs found).
+- FEATURE — ADD TO CALENDAR (.ics): new src/lib/calendar.ts builds RFC 5545 VCALENDAR (CRLF, 75-octet folding, TEXT escaping, fixed IST→UTC +05:30 conversion so no VTIMEZONE needed, VALARM 2h reminder, STATUS:CONFIRMED). Tolerant time parser handles the booking form's broad windows ("Morning (7:00 AM – 11:00 AM)" → event spans the window), exact times ("7:30 PM" → 60-min event) and missing time → all-day DATE event. Downloaded client-side via Blob. Surfaces: TrackPage "Add to Calendar" gold-outline button (SCHEDULED + date only) and admin AppointmentsTab dialog "Calendar (.ics)" beside Print summary. Validated output via bun for window/exact/all-day cases (07:00 IST → 0130Z correct); DTSTAMP switched to generation time.
+- FEATURE — ADMIN TREND DELTA: OverviewTab TrendChart now shows a week-over-week chip ("+100% vs previous week", gold when up, muted when down/flat, TrendingUp/Down icon, aria-label) comparing last-7 vs previous-7 of the 14-day window; legend relabelled previous/last 7 days.
+- FIX (risk from Task 6) — PRINT SLIP FALLBACK: printAppointmentSlip now falls back to a hidden 1px srcdoc iframe (aria-hidden, auto-removed after 60s) when window.open is blocked; embedded onload script still drives window.print() inside the frame.
+- FIX (risk from Task 5) — SETTINGS-DRIVEN HOURS: OpenNowBadge now parses the admin-editable workingHours SiteSetting (parseWorkingHours: colon-split day/time, full + 3-letter day names, dash ranges, en/em/hyphen dashes; null → documented DEFAULT_HOURS fallback). Unit-validated: defaults round-trip, "Mon - Fri/Saturday/Sunday: CLOSED" → Mon–Fri 8–8, Sat 8–2, Sun closed, garbage → fallback. HoursNote now renders settings text (compacted to one line, optional text prop).
+- STYLE — READING PROGRESS: Header gains a 2px gold hairline (absolute bottom, origin-left scaleX, rAF-throttled scroll+resize listener, aria-hidden) filling as the patient scrolls — subtle Lambo-grade detail on every page.
+- STYLE — TRACKER TIMELINE: stage 1 shows the request timestamp; the current stage shows "Updated …" micro stamp; the active marker now carries a soft gold glow (shadow), connectors unchanged.
+- QA: eslint . → 0 problems; tsc clean outside pre-existing examples/skills noise; agent-browser — track deep-link CDC-93PCC6 (set SCHEDULED via prisma for QA) renders SCHEDULED chip + stamps + calendar button (desktop + mobile 390px), admin dialog shows Calendar (.ics) and click fires clean, Overview delta chip renders, ContactPage badge "Open Now" from parsed settings, progress hairline fills on scroll; dev.log clean.
+
+Stage Summary:
+- Patients with a SCHEDULED appointment can now export a one-click, calendar-correct .ics (window/exact/all-day aware, 2h reminder) from the public tracker; front desk gets the same export inside the request dialog.
+- Two documented risks closed: print slip no longer depends on popups; open/closed badge + hours note are admin-editable content, not hardcoded.
+- Admin dashboard gained week-over-week momentum reading; header gained a gold reading-progress detail; tracker timeline gained real timestamps and a glowing active node.
+- Known/next: .ics DTSTAMP/UID correctness verified, but real-device Outlook/Apple Calendar import still worth a manual pass; trend delta divides by prev7=0 → capped at +100% display; PWA still has no service worker (offline mode) — only add if requested.

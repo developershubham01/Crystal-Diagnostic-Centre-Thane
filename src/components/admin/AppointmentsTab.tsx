@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarDays,
+  CalendarPlus,
   ChevronDown,
   ClipboardList,
   Clock,
@@ -22,6 +23,7 @@ import {
 } from "@/lib/api-client";
 import { APPOINTMENT_STATUSES } from "@/lib/constants";
 import { LOGO_MARK_SVG } from "@/components/brand/Logo";
+import { downloadAppointmentIcs } from "@/lib/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -127,10 +129,31 @@ function printAppointmentSlip(a: AppointmentDTO): void {
   <script>window.onload = function () { window.focus(); window.print(); };</script>
 </body></html>`;
   const w = window.open("", "_blank", "width=800,height=900");
-  if (!w) return;
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  if (w) {
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    return;
+  }
+  // Popup blocked → hidden-iframe fallback (the embedded script still
+  // triggers window.print() inside the frame on load).
+  try {
+    const frame = document.createElement("iframe");
+    frame.setAttribute("aria-hidden", "true");
+    frame.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;visibility:hidden;";
+    frame.srcdoc = html;
+    frame.onload = () => {
+      try {
+        frame.contentWindow?.focus();
+      } catch {
+        /* cross-origin guard — srcdoc is same-origin, never expected */
+      }
+      setTimeout(() => frame.remove(), 60_000);
+    };
+    document.body.appendChild(frame);
+  } catch {
+    // No popup, no iframe — nothing else we can do silently.
+  }
 }
 
 function AppointmentDetailDialog({
@@ -212,15 +235,37 @@ function AppointmentDetailDialog({
               </DialogDescription>
             </DialogHeader>
 
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => printAppointmentSlip(appointment)}
-            >
-              <Printer className="h-4 w-4" aria-hidden />
-              Print summary
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => printAppointmentSlip(appointment)}
+              >
+                <Printer className="h-4 w-4" aria-hidden />
+                Print summary
+              </Button>
+              {appointment.status === "SCHEDULED" && appointment.preferredDate && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-gold/40 text-gold-text hover:bg-gold/10 hover:text-gold-text sm:w-auto"
+                  onClick={() =>
+                    downloadAppointmentIcs({
+                      reference: appointment.reference,
+                      patientName: appointment.name,
+                      testOrPackage: appointment.testOrPackage,
+                      preferredDate: appointment.preferredDate as string,
+                      preferredTime: appointment.preferredTime,
+                      trackUrl: `${window.location.origin}/#/track?reference=${appointment.reference}`,
+                    })
+                  }
+                >
+                  <CalendarPlus className="h-4 w-4" aria-hidden />
+                  Calendar (.ics)
+                </Button>
+              )}
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <DetailRow label="Patient name" value={appointment.name} />

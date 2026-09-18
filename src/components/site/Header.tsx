@@ -27,12 +27,35 @@ export function Header() {
   const { data: settings } = useSettings();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll, { passive: true } as never);
+  }, []);
+
+  // Gold reading-progress hairline (rAF-throttled; colour-only decoration)
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      setProgress(max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -65,7 +88,7 @@ export function Header() {
       </a>
       <div
         className={cn(
-          "w-full border-b transition-all duration-300",
+          "relative w-full border-b transition-all duration-300",
           scrolled
             ? "border-white/10 bg-black/85 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] backdrop-blur-xl"
             : "border-transparent bg-black/55 backdrop-blur-md"
@@ -191,6 +214,17 @@ export function Header() {
               </SheetContent>
             </Sheet>
           </div>
+        </div>
+
+        {/* Reading-progress hairline — gold fill, 2px, above the border */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[2px] overflow-hidden bg-white/[0.06]"
+        >
+          <div
+            className="h-full w-full origin-left bg-gold will-change-transform"
+            style={{ transform: `scaleX(${progress})` }}
+          />
         </div>
       </div>
     </header>

@@ -14,6 +14,7 @@ import {
   Plus,
   Sparkles,
   Stethoscope,
+  TrendingDown,
   TrendingUp,
 } from "lucide-react";
 import { api, type AppointmentDTO } from "@/lib/api-client";
@@ -71,8 +72,35 @@ function StatCard({
 
 function TrendChart({ trend }: { trend: { date: string; count: number }[] }) {
   const max = Math.max(1, ...trend.map((t) => t.count));
+
+  // Week-over-week delta (last 7 vs previous 7 of the 14-day window)
+  const last7 = trend.slice(-7).reduce((a, t) => a + t.count, 0);
+  const prev7 = trend.slice(0, 7).reduce((a, t) => a + t.count, 0);
+  const hasDelta = last7 > 0 || prev7 > 0;
+  const deltaPct = prev7 === 0 ? (last7 > 0 ? 100 : 0) : Math.round(((last7 - prev7) / prev7) * 100);
+  const DeltaIcon = deltaPct > 0 ? TrendingUp : TrendingDown;
+
   return (
     <div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">Requests per day</p>
+        {hasDelta && (
+          <span
+            className={`inline-flex items-center gap-1.5 border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] ${
+              deltaPct > 0
+                ? "border-gold/40 bg-gold/10 text-gold-text"
+                : deltaPct < 0
+                  ? "border-white/20 bg-white/5 text-ash"
+                  : "border-white/15 bg-white/5 text-ash"
+            }`}
+            aria-label={`Requests ${deltaPct >= 0 ? "up" : "down"} ${Math.abs(deltaPct)} percent versus the previous week`}
+          >
+            <DeltaIcon className="h-3 w-3" aria-hidden />
+            {deltaPct >= 0 ? "+" : ""}
+            {deltaPct}% vs previous week
+          </span>
+        )}
+      </div>
       <div className="flex h-36 items-end gap-1.5" role="img" aria-label="Appointment requests over the last 14 days">
         {trend.map((t, i) => {
           const pct = Math.round((t.count / max) * 100);
@@ -91,8 +119,8 @@ function TrendChart({ trend }: { trend: { date: string; count: number }[] }) {
       <div className="mt-2 flex justify-between text-[10px] font-semibold uppercase tracking-[0.12em] text-ash">
         <span>{fmtDate(trend[0]?.date)}</span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-2 bg-white/15" aria-hidden /> last 14 days
-          <span className="ml-2 inline-block h-2 w-2 bg-gold" aria-hidden /> today
+          <span className="inline-block h-2 w-2 bg-white/15" aria-hidden /> previous 7 days
+          <span className="ml-2 inline-block h-2 w-2 bg-gold" aria-hidden /> last 7 days
         </span>
         <span>{fmtDate(trend[trend.length - 1]?.date)}</span>
       </div>
