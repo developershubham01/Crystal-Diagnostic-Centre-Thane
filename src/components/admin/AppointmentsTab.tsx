@@ -77,18 +77,40 @@ function DetailRow({ label, value, icon }: { label: string; value: React.ReactNo
 }
 
 /**
- * Opens a print-friendly front-desk slip for an appointment request in a
- * dedicated popup window (black on white for paper) and invokes printing.
- * Internal notes are deliberately excluded from the printout.
+ * Opens a print popup with the given HTML; falls back to a hidden iframe
+ * when popups are blocked (the embedded onload script still triggers
+ * window.print() inside the frame). Returns true when a route succeeded.
  */
-function printAppointmentSlip(a: AppointmentDTO): void {
-  const esc = (s: unknown) =>
-    String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
-  const received = new Date(a.createdAt).toLocaleString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true,
-  });
-  const html = `<!doctype html><html><head><meta charset="utf-8" /><title>Appointment ${esc(a.reference)}</title>
-<style>
+function openPrintWindow(html: string): boolean {
+  const w = window.open("", "_blank", "width=800,height=900");
+  if (w) {
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    return true;
+  }
+  try {
+    const frame = document.createElement("iframe");
+    frame.setAttribute("aria-hidden", "true");
+    frame.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;visibility:hidden;";
+    frame.srcdoc = html;
+    frame.onload = () => {
+      try {
+        frame.contentWindow?.focus();
+      } catch {
+        /* cross-origin guard — srcdoc is same-origin, never expected */
+      }
+      setTimeout(() => frame.remove(), 60_000);
+    };
+    document.body.appendChild(frame);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Shared print CSS for front-desk printouts (black on white). */
+const PRINT_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, Helvetica, sans-serif; color: #111; padding: 32px; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 12px; }
@@ -107,7 +129,21 @@ function printAppointmentSlip(a: AppointmentDTO): void {
   .sign { margin-top: 48px; display: flex; justify-content: space-between; font-size: 11px; color: #333; }
   .sign span { border-top: 1px solid #333; padding-top: 4px; width: 220px; text-align: center; }
   @media print { body { padding: 12mm; } }
-</style></head><body>
+`;
+
+/**
+ * Opens a print-friendly front-desk slip for an appointment request in a
+ * dedicated popup window (black on white for paper) and invokes printing.
+ * Internal notes are deliberately excluded from the printout.
+ */
+function printAppointmentSlip(a: AppointmentDTO): void {
+  const esc = (s: unknown) =>
+    String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+  const received = new Date(a.createdAt).toLocaleString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true,
+  });
+  const html = `<!doctype html><html><head><meta charset="utf-8" /><title>Appointment ${esc(a.reference)}</title>
+<style>${PRINT_STYLES}</style></head><body>
   <div class="head">
     <div class="brand">${LOGO_MARK_SVG}<div class="bname">CRYSTAL DIAGNOSTIC CENTRE<small>UTHALSAR NAKA · THANE WEST · +91 88283 93955</small></div></div>
     <div class="ref"><div class="label">APPOINTMENT REFERENCE</div><div class="code">${esc(a.reference)}</div></div>
@@ -128,32 +164,57 @@ function printAppointmentSlip(a: AppointmentDTO): void {
   <div class="foot">Track this request any time at ${esc(`${location.origin}/#/track?reference=${a.reference}`)} with the reference code and the booked mobile number. This is an appointment request summary, not a medical report or bill.</div>
   <script>window.onload = function () { window.focus(); window.print(); };</script>
 </body></html>`;
-  const w = window.open("", "_blank", "width=800,height=900");
-  if (w) {
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-    return;
-  }
-  // Popup blocked → hidden-iframe fallback (the embedded script still
-  // triggers window.print() inside the frame on load).
-  try {
-    const frame = document.createElement("iframe");
-    frame.setAttribute("aria-hidden", "true");
-    frame.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;visibility:hidden;";
-    frame.srcdoc = html;
-    frame.onload = () => {
-      try {
-        frame.contentWindow?.focus();
-      } catch {
-        /* cross-origin guard — srcdoc is same-origin, never expected */
-      }
-      setTimeout(() => frame.remove(), 60_000);
-    };
-    document.body.appendChild(frame);
-  } catch {
-    // No popup, no iframe — nothing else we can do silently.
-  }
+  openPrintWindow(html);
+}
+
+/**
+ * Printable front-desk DAY SHEET — every SCHEDULED visit for one date,
+ * used at the reception counter to walk through the day's appointments.
+ */
+function printDaySheet(appointments: AppointmentDTO[], dateISO: string): void {
+  const esc = (s: unknown) =>
+    String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+  const scheduled = appointments
+    .filter((a) => a.status === "SCHEDULED" && a.preferredDate === dateISO)
+    .sort((a, b) => (a.preferredTime ?? "").localeCompare(b.preferredTime ?? ""));
+  const pretty = new Date(`${dateISO}T00:00:00`).toLocaleDateString("en-IN", {
+    weekday: "long", day: "2-digit", month: "long", year: "numeric",
+  });
+
+  const rows = scheduled.length
+    ? scheduled
+        .map(
+          (a, i) => `<tr>
+            <td style="width:34px;color:#555;">${i + 1}</td>
+            <td style="width:150px;">${esc(a.preferredTime || "Any — confirm on call")}</td>
+            <td style="width:110px;font-family:Consolas,monospace;font-weight:700;">${esc(a.reference)}</td>
+            <td><strong>${esc(a.name)}</strong></td>
+            <td style="width:110px;">+91 ${esc(a.mobile)}</td>
+            <td>${esc(a.testOrPackage)}${a.homeCollection ? ' <span style="color:#777;">· home visit</span>' : ""}</td>
+          </tr>`
+        )
+        .join("")
+    : `<tr><td colspan="6" style="text-align:center;color:#777;padding:24px 0;">No scheduled visits for this date.</td></tr>`;
+
+  const html = `<!doctype html><html><head><meta charset="utf-8" /><title>Day sheet ${esc(dateISO)}</title>
+<style>${PRINT_STYLES}
+  td { padding: 9px 8px; font-size: 12.5px; }
+  tr.head-row td { font-size: 9.5px; letter-spacing: 0.16em; color: #555; text-transform: uppercase; border-bottom: 2px solid #111; }
+</style></head><body>
+  <div class="head">
+    <div class="brand">${LOGO_MARK_SVG}<div class="bname">CRYSTAL DIAGNOSTIC CENTRE<small>UTHALSAR NAKA · THANE WEST · +91 88283 93955</small></div></div>
+    <div class="ref"><div class="label">FRONT-DESK DAY SHEET</div><div class="code" style="font-size:14px;">${esc(pretty)}</div></div>
+  </div>
+  <h1>SCHEDULED VISITS — ${scheduled.length} APPOINTMENT${scheduled.length === 1 ? "" : "S"}</h1>
+  <table>
+    <tr class="head-row"><td>#</td><td>Slot</td><td>Reference</td><td>Patient</td><td>Mobile</td><td>Test / Package</td></tr>
+    ${rows}
+  </table>
+  <div class="sign"><span>Prepared by</span><span>Front desk</span></div>
+  <div class="foot">Only requests with status SCHEDULED appear here. Times are patient preferences — reconfirm on call. This sheet is for internal reception use, not a medical record or bill.</div>
+  <script>window.onload = function () { window.focus(); window.print(); };</script>
+</body></html>`;
+  openPrintWindow(html);
 }
 
 function AppointmentDetailDialog({
@@ -408,6 +469,10 @@ export function AppointmentsTab() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const debouncedQ = useDebouncedValue(filters.q);
+  // Day-sheet date, defaulting to "today" at the centre (Asia/Kolkata).
+  const [daySheetDate, setDaySheetDate] = useState(() =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date())
+  );
 
   const qs = useMemo(() => {
     const p = new URLSearchParams();
@@ -427,6 +492,14 @@ export function AppointmentsTab() {
 
   // Memoized so the rolling "seen" merge below can safely compare by identity.
   const appointments = useMemo(() => list.data ?? [], [list.data]);
+
+  // Day sheet source: ALL scheduled visits (independent of the visible
+  // filters above, so the sheet is correct whatever the admin is filtering).
+  const daySheet = useQuery<AppointmentDTO[]>({
+    queryKey: ["daysheet", daySheetDate],
+    queryFn: () => api.get<AppointmentDTO[]>("/api/appointments?status=SCHEDULED"),
+    placeholderData: (prev) => prev,
+  });
 
   // Keep a rolling map of every loaded request so the detail dialog keeps
   // working even if a status change moves the row out of the active filter.
@@ -457,10 +530,36 @@ export function AppointmentsTab() {
         title="Appointment Requests"
         description="Every online booking request from the public site. Open a request to call the patient, update its status and keep internal notes."
         actions={
-          <Button variant="outline" onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}>
-            <Download className="h-4 w-4" aria-hidden />
-            Export CSV
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 border border-brandborder bg-card px-3 py-1.5">
+              <Label
+                htmlFor="daysheet-date"
+                className="text-[10px] font-semibold uppercase tracking-[0.14em] text-inkmuted"
+              >
+                Day sheet
+              </Label>
+              <input
+                id="daysheet-date"
+                type="date"
+                value={daySheetDate}
+                onChange={(e) => setDaySheetDate(e.target.value)}
+                className="bg-transparent text-sm text-ink outline-none"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 px-2.5 text-[11px]"
+                onClick={() => printDaySheet(daySheet.data ?? [], daySheetDate)}
+              >
+                <Printer className="h-3.5 w-3.5" aria-hidden />
+                Print
+              </Button>
+            </div>
+            <Button variant="outline" onClick={() => window.open("/api/admin/export?type=appointments", "_blank")}>
+              <Download className="h-4 w-4" aria-hidden />
+              Export CSV
+            </Button>
+          </div>
         }
       />
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MapPin, Phone, Mail, Clock, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { LogoHorizontal } from "@/components/brand/Logo";
+import { OpenNowBadge } from "@/components/site/OpenNowBadge";
 import { useRoute, useRouterStore } from "@/lib/store";
 import { useSettings } from "@/lib/hooks";
 
@@ -118,6 +119,9 @@ export function Footer() {
               <li className="flex gap-2.5">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-cyan-pulse" aria-hidden />
                 <span>
+                  <div className="mb-2">
+                    <OpenNowBadge />
+                  </div>
                   {settings.workingHours.split("\n").map((line, i) => (
                     <span key={i} className="block">
                       {line}

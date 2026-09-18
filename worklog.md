@@ -282,3 +282,20 @@ Stage Summary:
 - Two documented risks closed: print slip no longer depends on popups; open/closed badge + hours note are admin-editable content, not hardcoded.
 - Admin dashboard gained week-over-week momentum reading; header gained a gold reading-progress detail; tracker timeline gained real timestamps and a glowing active node.
 - Known/next: .ics DTSTAMP/UID correctness verified, but real-device Outlook/Apple Calendar import still worth a manual pass; trend delta divides by prev7=0 → capped at +100% display; PWA still has no service worker (offline mode) — only add if requested.
+---
+Task ID: 9 (cron round)
+Agent: Z.ai Code (lead)
+Task: Booking preparation hints + front-desk day sheet + live footer badge
+
+Work Log:
+- STATUS: stable — routes/APIs 200, dev.log clean, zero console errors; worklog review showed Tasks 1–8 complete. No bugs found → feature round. (Planned FAQPage JSON-LD was dropped — already present in FaqPage; scrollbar/::selection styling already exists in globals.css; medblue classes verified as gold-mapped theme shim, not violations.)
+- FEATURE — PREPARATION HINTS AT BOOKING: BookTestPage derives the selected service/package (form.testValue → useServices/usePackages data) and renders a gold-bar callout under the dropdown with its `preparation` text (role=note, aria-live=polite, whitespace-pre-line) plus an "indicative — confirmed on call" micro-disclaimer. Patients now see fasting/medication guidance at booking time instead of discovering it on the detail page. Verified with "Lipid Profile" (fast 10–12h text from DB).
+- FEATURE — FRONT-DESK DAY SHEET: AppointmentsTab toolbar gains a date picker (defaults to today in Asia/Kolkata via Intl en-CA) + Print button. printDaySheet() opens a black-on-white printout of every SCHEDULED visit whose preferredDate matches, sorted by time text, with # / slot / reference (mono) / patient / mobile / test + home-visit marker, counts in the heading, prepared-by + front-desk signature lines and an internal-use footnote; empty date still prints "No scheduled visits for this date." Refactor: shared openPrintWindow() (popup → hidden srcdoc iframe fallback) + PRINT_STYLES constant now serve both the per-request slip and the day sheet. Data comes from a dedicated useQuery("daysheet", /api/appointments?status=SCHEDULED) so the sheet is independent of whatever filters the admin has active (from/to on the API filter createdAt, not preferredDate — hence client-side date match).
+- FEATURE/STYLE — LIVE FOOTER BADGE: OpenNowBadge now renders in the footer Contact column above the working-hours lines — visitors see OPEN NOW / CLOSED NOW (gold/muted) at every page without scrolling; hours still parsed from the admin-editable setting.
+- QA: eslint . → 0 problems; tsc clean outside pre-existing examples/skills noise; agent-browser — booking select "Lipid Profile" → hint renders; admin appointments tab → day-sheet date prefilled 2026-09-18, Print click verified via window.open stub (no console errors); footer badge "OPEN NOW" visible above hours; dev.log clean.
+
+Stage Summary:
+- Booking flow now closes the information gap: preparation guidance appears the moment a test/package is chosen.
+- Reception gets an operational day sheet (date-selectable, filter-independent, print-resilient) alongside the existing per-request slips and CSV export.
+- Footer carries a live open/closed status chip, tying the admin-editable hours into every page.
+- Known/next: day sheet takes up to 500 scheduled rows (API take limit — ample for this site); prep hint only shows when the centre maintains preparation text (fields are admin-editable); PWA service worker remains intentionally absent.

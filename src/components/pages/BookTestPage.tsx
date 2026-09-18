@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   CalendarCheck,
   CheckCircle2,
+  ClipboardList,
   Clock,
   Home,
   Info,
@@ -128,6 +129,21 @@ export function BookTestPage() {
     map.set(OTHER_OPTION, "Other (specify in message)");
     return map;
   }, [services, packages]);
+
+  // Preparation guidance for the currently selected service/package —
+  // surfaced right under the dropdown so patients book correctly first time.
+  const selectedTest = useMemo(() => {
+    const v = form.testValue;
+    if (v.startsWith("service:")) {
+      const s = services.find((x) => x.slug === v.slice(8));
+      return s ? { name: s.name, preparation: s.preparation } : null;
+    }
+    if (v.startsWith("package:")) {
+      const p = packages.find((x) => x.slug === v.slice(8));
+      return p ? { name: p.name, preparation: p.preparation } : null;
+    }
+    return null;
+  }, [form.testValue, services, packages]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -442,6 +458,28 @@ export function BookTestPage() {
                           </SelectContent>
                         </Select>
                         <FieldError id="book-test-error" message={errors.testValue} />
+
+                        {/* Live preparation hint from the selected service/package */}
+                        {selectedTest?.preparation && (
+                          <div
+                            role="note"
+                            aria-live="polite"
+                            className="mt-3 flex items-start gap-3 border border-gold/25 border-l-2 border-l-gold bg-white/[0.03] px-4 py-3"
+                          >
+                            <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden />
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-text">
+                                Preparation — {selectedTest.name}
+                              </p>
+                              <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-inkmuted">
+                                {selectedTest.preparation}
+                              </p>
+                              <p className="mt-1.5 text-[11px] uppercase tracking-[0.1em] text-steel">
+                                Indicative — the centre confirms final instructions on call.
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="grid gap-5 sm:grid-cols-2">
