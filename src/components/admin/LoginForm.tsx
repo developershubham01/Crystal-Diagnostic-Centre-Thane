@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, Loader2, LogIn, ShieldAlert, User } from "lucide-react";
+import { KeyRound, Loader2, LogIn, User } from "lucide-react";
 import { api, ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -126,15 +126,6 @@ export function LoginForm({ onSuccess }: { onSuccess: (admin: AdminInfo) => void
                 )}
               </Button>
             </form>
-
-            <div className="mt-6 flex items-start gap-2 border border-gold/30 bg-gold/10 px-4 py-3">
-              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden />
-              <p className="text-xs leading-relaxed text-gold-text/90">
-                <strong>Demo environment:</strong> sample credentials are{" "}
-                <code className="bg-white/10 px-1 py-0.5 font-mono text-[11px] text-ink">admin / Crystal@2024</code>.
-                Change these via the ADMIN_USERNAME / ADMIN_PASSWORD environment variables before production use.
-              </p>
-            </div>
           </CardContent>
         </Card>
 
