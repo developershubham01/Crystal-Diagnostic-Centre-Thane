@@ -166,7 +166,7 @@ export function BookTestPage() {
     return () => clearTimeout(t);
   }, [dupeHint]);
 
-  const minDate = useMemo(todayIso, []);
+  const minDate = useMemo(() => todayIso(), []);
 
   // Centre visiting hours (admin-editable) drive date validation — closed
   // days can't be requested, so patients never pick a dead slot.

@@ -61,23 +61,26 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    // Close the drawer whenever navigation happens (incl. browser back/forward)
     const close = () => setOpen(false);
+    window.addEventListener("popstate", close);
     window.addEventListener("hashchange", close);
-    return () => window.removeEventListener("hashchange", close);
+    return () => {
+      window.removeEventListener("popstate", close);
+      window.removeEventListener("hashchange", close);
+    };
   }, []);
 
-  const isActive = (hash: string) => {
-    const target = hash.replace("#/", "").replace("#", "");
+  const isActive = (path: string) => {
+    const target = path.replace(/^\//, "");
     if (target === "") return route.name === "home";
     if (target === "services") return route.name === "services" || route.name === "service-detail";
     if (target === "packages") return route.name === "packages" || route.name === "package-detail";
     return route.name === target;
   };
 
-  const go = (hash: string) => {
+  const go = (path: string) => {
     setOpen(false);
-    navigate(hash);
+    navigate(path);
   };
 
   return (
@@ -99,10 +102,10 @@ export function Header() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 md:h-20 lg:px-8">
           {/* Logo — white/gold mark floating in darkness */}
           <Link
-            href="#/"
+            href="/"
             onClick={(e) => {
               e.preventDefault();
-              go("#/");
+              go("/");
             }}
             aria-label="Crystal Diagnostic Centre — Home"
             className="shrink-0 outline-offset-4"
@@ -110,52 +113,37 @@ export function Header() {
             <LogoHorizontal showTagline={false} />
           </Link>
 
-          {/* Desktop nav — uppercase micro labels, gold active state */}
-          <nav aria-label="Primary" className="hidden items-center gap-6 lg:flex">
-            {NAV.map((item) => {
-              const active = isActive(item.route);
-              return (
-                <Link
-                  key={item.route}
-                  href={item.route}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    go(item.route);
-                  }}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "group relative py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors",
-                    active ? "text-gold" : "text-white/60 hover:text-white"
-                  )}
-                >
-                  {item.label}
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-gold transition-transform duration-300",
-                      active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                    )}
-                  />
-                </Link>
-              );
-            })}
+          {/* Desktop Nav */}
+          <nav aria-label="Primary" className="hidden lg:flex lg:items-center lg:gap-7">
+            {NAV.map((item) => (
+              <button
+                key={item.route}
+                onClick={() => go(item.route)}
+                className={cn(
+                  "relative py-2 text-[11.5px] font-semibold uppercase tracking-[0.2em] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold",
+                  isActive(item.route) ? "text-gold font-bold" : "text-white/80 hover:text-white"
+                )}
+              >
+                {item.label}
+                {isActive(item.route) && (
+                  <span className="absolute bottom-0 left-0 h-[2px] w-full bg-gold shadow-[0_0_8px_rgba(255,192,0,0.8)]" />
+                )}
+              </button>
+            ))}
           </nav>
 
-          {/* Actions */}
+          {/* Search + Primary CTAs */}
           <div className="flex items-center gap-2.5">
-            {/* Site search — icon chip (mobile) / labeled chip with ⌘K (desktop) */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search the site (Ctrl+K)"
-              aria-haspopup="dialog"
-              aria-expanded={searchOpen}
+              aria-label="Search the site"
               className="inline-flex items-center gap-2 border border-white/25 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/85 transition-colors hover:border-gold hover:text-gold"
             >
               <Search className="h-3.5 w-3.5 text-gold" aria-hidden />
               <span className="hidden xl:inline">Search</span>
-              <kbd className="hidden border border-white/15 bg-white/[0.04] px-1 py-0.5 font-mono text-[9px] font-bold tracking-widest text-ash xl:inline">⌘K</kbd>
             </button>
+            <SiteSearch open={searchOpen} onOpenChange={setSearchOpen} />
             <a
               href="tel:+918828393955"
               className="hidden items-center gap-2 border border-white/25 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/85 transition-colors hover:border-gold hover:text-gold md:inline-flex"
@@ -164,7 +152,7 @@ export function Header() {
               {settings.phone || "+91 88283 93955"}
             </a>
             <Button
-              onClick={() => go("#/book-test")}
+              onClick={() => go("/book-test")}
               className="hidden sm:inline-flex"
             >
               <CalendarCheck className="mr-0.5 h-4 w-4" aria-hidden />
@@ -210,11 +198,11 @@ export function Header() {
                     </button>
                   ))}
                   <div className="mt-5 space-y-2.5">
-                    <Button onClick={() => go("#/book-test")} className="w-full">
+                    <Button onClick={() => go("/book-test")} className="w-full">
                       <CalendarCheck className="mr-1 h-4 w-4" aria-hidden />
                       Book a Test
                     </Button>
-                    <Button onClick={() => go("#/reports")} variant="outline" className="w-full">
+                    <Button onClick={() => go("/reports")} variant="outline" className="w-full">
                       Report Access
                     </Button>
                     <a

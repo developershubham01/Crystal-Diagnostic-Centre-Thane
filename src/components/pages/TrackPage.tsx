@@ -141,7 +141,11 @@ export function TrackPage() {
     const mobMatch = /[?&]mobile=(\d{10})/.exec(fromHash);
     if (!refMatch || !mobMatch) return;
     autoRan.current = true;
-    void runLookup(refMatch[1].toUpperCase(), mobMatch[1]);
+    const refCode = refMatch[1].toUpperCase();
+    const mobNum = mobMatch[1];
+    setTimeout(() => {
+      void runLookup(refCode, mobNum);
+    }, 0);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {

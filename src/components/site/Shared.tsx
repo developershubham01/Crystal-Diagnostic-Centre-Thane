@@ -16,7 +16,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
       <ol className="flex flex-wrap items-center gap-1 text-[11px] uppercase tracking-[0.14em]">
         <li>
           <button
-            onClick={() => navigate("#/")}
+            onClick={() => navigate("/")}
             className="inline-flex items-center gap-1 font-semibold text-inkmuted transition-colors hover:text-gold"
           >
             <Home className="h-3.5 w-3.5" aria-hidden />

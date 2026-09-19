@@ -37,15 +37,19 @@ function DemoNotice() {
  * The admin route renders standalone (no public chrome) for a focused dashboard.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const syncFromHash = useRouterStore((s) => s.syncFromHash);
+  const syncFromUrl = useRouterStore((s) => s.syncFromUrl);
   const route = useRoute();
 
   useEffect(() => {
-    syncFromHash();
-    const onHash = () => syncFromHash();
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, [syncFromHash]);
+    syncFromUrl();
+    const onUrlChange = () => syncFromUrl();
+    window.addEventListener("popstate", onUrlChange);
+    window.addEventListener("hashchange", onUrlChange);
+    return () => {
+      window.removeEventListener("popstate", onUrlChange);
+      window.removeEventListener("hashchange", onUrlChange);
+    };
+  }, [syncFromUrl]);
 
   // Keep {children} mounted for SSR content of the single route
   void children;

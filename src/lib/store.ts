@@ -3,9 +3,7 @@
 import { create } from "zustand";
 
 /**
- * Hash-based SPA router.
- * The sandbox preview only exposes the `/` route, so the whole site is
- * client-side routed via location.hash (e.g. #/services, #/packages/full-body-checkup).
+ * Clean path-based client router (HTML5 History API).
  */
 
 export type Route =
@@ -27,10 +25,14 @@ export type Route =
   | { name: "admin" }
   | { name: "not-found" };
 
-function parseHash(hash: string): Route {
-  const raw = hash.replace(/^#\/?/, "").replace(/\/+$/, "");
-  // Tolerate query strings in the hash (e.g. #/track?reference=CDC-XXXX)
-  const clean = raw.split("?")[0];
+export function parsePath(url: string): Route {
+  if (typeof window !== "undefined" && window.location.hash && window.location.hash.startsWith("#/")) {
+    const legacyPath = window.location.hash.replace(/^#\/?/, "/");
+    window.history.replaceState({}, "", legacyPath);
+    url = legacyPath;
+  }
+  
+  const clean = url.replace(/^#\/?/, "/").split("?")[0];
   const parts = clean.split("/").filter(Boolean).map(decodeURIComponent);
 
   if (parts.length === 0) return { name: "home" };
@@ -69,13 +71,13 @@ function parseHash(hash: string): Route {
 export function routeToPath(route: Route): string {
   switch (route.name) {
     case "home":
-      return "#/";
+      return "/";
     case "service-detail":
-      return `#/services/${route.slug}`;
+      return `/services/${route.slug}`;
     case "package-detail":
-      return `#/packages/${route.slug}`;
+      return `/packages/${route.slug}`;
     default:
-      return `#/${route.name}`;
+      return `/${route.name}`;
   }
 }
 
@@ -83,28 +85,37 @@ interface RouterState {
   route: Route;
   ready: boolean;
   navigate: (to: string) => void;
+  syncFromUrl: () => void;
   syncFromHash: () => void;
 }
 
-export const useRouterStore = create<RouterState>((set) => ({
+export const useRouterStore = create<RouterState>((set, get) => ({
   route: { name: "home" },
   ready: false,
   navigate: (to: string) => {
-    const target = to.startsWith("#") ? to : `#${to.startsWith("/") ? to : `/${to}`}`;
-    if (typeof window !== "undefined" && window.location.hash !== target) {
-      window.location.hash = target;
-    } else {
-      // Same-hash navigation: force sync (e.g. re-clicking a nav link)
-      set({ route: parseHash(target) });
+    let clean = to;
+    if (clean.startsWith("#/")) clean = clean.substring(1);
+    else if (clean.startsWith("#")) clean = clean.substring(1);
+    if (!clean.startsWith("/")) clean = "/" + clean;
+
+    const current = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+    if (typeof window !== "undefined" && current !== clean) {
+      window.history.pushState({}, "", clean);
     }
+    
+    set({ route: parsePath(clean) });
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "auto" });
     }
   },
-  syncFromHash: () => {
+  syncFromUrl: () => {
     if (typeof window === "undefined") return;
-    set({ route: parseHash(window.location.hash), ready: true });
+    const url = window.location.pathname + window.location.search + window.location.hash;
+    set({ route: parsePath(url), ready: true });
     window.scrollTo({ top: 0, behavior: "auto" });
+  },
+  syncFromHash: () => {
+    get().syncFromUrl();
   },
 }));
 

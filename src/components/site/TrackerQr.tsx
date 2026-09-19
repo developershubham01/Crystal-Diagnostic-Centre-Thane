@@ -28,7 +28,7 @@ export function TrackerQr({
 
   useEffect(() => {
     let cancelled = false;
-    const url = `${window.location.origin}/#/track?reference=${encodeURIComponent(reference)}`;
+    const url = `${window.location.origin}/track?reference=${encodeURIComponent(reference)}`;
     QRCode.toDataURL(url, {
       width: size * 2, // 2x for retina crispness
       margin: 1,

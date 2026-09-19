@@ -9,20 +9,20 @@ import { useRoute, useRouterStore } from "@/lib/store";
 import { useSettings } from "@/lib/hooks";
 
 const QUICK_LINKS = [
-  { label: "Home", route: "#/" },
-  { label: "About Us", route: "#/about" },
-  { label: "Services", route: "#/services" },
-  { label: "Health Packages", route: "#/packages" },
-  { label: "Book a Test", route: "#/book-test" },
-  { label: "Gallery", route: "#/gallery" },
-  { label: "FAQ", route: "#/faq" },
-  { label: "Contact", route: "#/contact" },
+  { label: "Home", route: "/" },
+  { label: "About Us", route: "/about" },
+  { label: "Services", route: "/services" },
+  { label: "Health Packages", route: "/packages" },
+  { label: "Book a Test", route: "/book-test" },
+  { label: "Gallery", route: "/gallery" },
+  { label: "FAQ", route: "/faq" },
+  { label: "Contact", route: "/contact" },
 ];
 
 const LEGAL_LINKS = [
-  { label: "Privacy Policy", route: "#/privacy" },
-  { label: "Terms of Use", route: "#/terms" },
-  { label: "Medical Disclaimer", route: "#/disclaimer" },
+  { label: "Privacy Policy", route: "/privacy" },
+  { label: "Terms of Use", route: "/terms" },
+  { label: "Medical Disclaimer", route: "/disclaimer" },
 ];
 
 export function Footer() {
@@ -138,27 +138,27 @@ export function Footer() {
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Patient Resources</h3>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
-                <Link href="#/book-test" onClick={link("#/book-test")} className="text-white/70 hover:text-gold">
+                <Link href="/book-test" onClick={link("/book-test")} className="text-white/70 hover:text-gold">
                   Request an Appointment
                 </Link>
               </li>
               <li>
-                <Link href="#/track" onClick={link("#/track")} className="text-white/70 hover:text-gold">
+                <Link href="/track" onClick={link("/track")} className="text-white/70 hover:text-gold">
                   Track Your Request
                 </Link>
               </li>
               <li>
-                <Link href="#/reports" onClick={link("#/reports")} className="text-white/70 hover:text-gold">
+                <Link href="/reports" onClick={link("/reports")} className="text-white/70 hover:text-gold">
                   Online Report Access
                 </Link>
               </li>
               <li>
-                <Link href="#/faq" onClick={link("#/faq")} className="text-white/70 hover:text-gold">
+                <Link href="/faq" onClick={link("/faq")} className="text-white/70 hover:text-gold">
                   Frequently Asked Questions
                 </Link>
               </li>
               <li>
-                <Link href="#/packages" onClick={link("#/packages")} className="text-white/70 hover:text-gold">
+                <Link href="/packages" onClick={link("/packages")} className="text-white/70 hover:text-gold">
                   Preventive Health Packages
                 </Link>
               </li>
@@ -186,7 +186,7 @@ export function Footer() {
                 {l.label}
               </Link>
             ))}
-            <Link href="#/admin" onClick={link("#/admin")} className="text-white/30 hover:text-gold">
+            <Link href="/admin" onClick={link("/admin")} className="text-white/30 hover:text-gold">
               Staff Login
             </Link>
           </nav>

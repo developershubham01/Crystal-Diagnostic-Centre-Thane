@@ -39,16 +39,16 @@ const GROUP_META: Record<Entry["group"], { heading: string; icon: React.Componen
 const GROUP_ORDER: Entry["group"][] = ["pages", "services", "packages", "faqs"];
 
 const PAGE_ENTRIES: Entry[] = [
-  { id: "p-home", group: "pages", label: "Home", route: "#/" },
-  { id: "p-about", group: "pages", label: "About the Centre", route: "#/about" },
-  { id: "p-book", group: "pages", label: "Book a Test", hint: "Appointment request", route: "#/book-test" },
-  { id: "p-track", group: "pages", label: "Track a Request", hint: "Reference + mobile", route: "#/track" },
-  { id: "p-services", group: "pages", label: "All Services", route: "#/services" },
-  { id: "p-packages", group: "pages", label: "All Health Packages", hint: "Includes Package Finder quiz", route: "#/packages" },
-  { id: "p-gallery", group: "pages", label: "Gallery — Real Photos", route: "#/gallery" },
-  { id: "p-reports", group: "pages", label: "Report Access", route: "#/reports" },
-  { id: "p-faq", group: "pages", label: "Frequently Asked Questions", route: "#/faq" },
-  { id: "p-contact", group: "pages", label: "Contact & Location", hint: "Uthalsar Naka, Thane West", route: "#/contact" },
+  { id: "p-home", group: "pages", label: "Home", route: "/" },
+  { id: "p-about", group: "pages", label: "About the Centre", route: "/about" },
+  { id: "p-book", group: "pages", label: "Book a Test", hint: "Appointment request", route: "/book-test" },
+  { id: "p-track", group: "pages", label: "Track a Request", hint: "Reference + mobile", route: "/track" },
+  { id: "p-services", group: "pages", label: "All Services", route: "/services" },
+  { id: "p-packages", group: "pages", label: "All Health Packages", hint: "Includes Package Finder quiz", route: "/packages" },
+  { id: "p-gallery", group: "pages", label: "Gallery — Real Photos", route: "/gallery" },
+  { id: "p-reports", group: "pages", label: "Report Access", route: "/reports" },
+  { id: "p-faq", group: "pages", label: "Frequently Asked Questions", route: "/faq" },
+  { id: "p-contact", group: "pages", label: "Contact & Location", hint: "Uthalsar Naka, Thane West", route: "/contact" },
 ];
 
 export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -69,11 +69,15 @@ export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onOpenChange]);
 
-  // Close on navigation (hash change covers in-palette jumps + browser back)
+  // Close on navigation (popstate/hashchange covers in-palette jumps + browser back)
   useEffect(() => {
     const close = () => onOpenChange(false);
+    window.addEventListener("popstate", close);
     window.addEventListener("hashchange", close);
-    return () => window.removeEventListener("hashchange", close);
+    return () => {
+      window.removeEventListener("popstate", close);
+      window.removeEventListener("hashchange", close);
+    };
   }, [onOpenChange]);
 
   const entries = useMemo<Entry[]>(() => {
@@ -83,20 +87,20 @@ export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange
         group: "services" as const,
         label: s.name,
         hint: s.shortDescription ?? undefined,
-        route: `#/services/${s.slug}`,
+        route: `/services/${s.slug}`,
       })),
       ...packages.map((p) => ({
         id: `k-${p.slug}`,
         group: "packages" as const,
         label: p.name,
         hint: p.description ?? undefined,
-        route: `#/packages/${p.slug}`,
+        route: `/packages/${p.slug}`,
       })),
       ...faqs.map((f) => ({
         id: `f-${f.id}`,
         group: "faqs" as const,
         label: f.question,
-        route: `#/faq?q=${f.id}`,
+        route: `/faq?q=${f.id}`,
       })),
     ];
     return [...dynamic, ...PAGE_ENTRIES];
