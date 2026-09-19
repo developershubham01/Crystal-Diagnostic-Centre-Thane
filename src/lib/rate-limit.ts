@@ -1,14 +1,19 @@
 /**
- * Simple in-memory sliding-window rate limiter.
- * Suitable for single-instance deployments; protects public form
- * endpoints and admin login from spam / brute force.
+ * In-memory rate limiter and failed login lockout manager.
+ * Protects public forms from spam and admin login from brute-force attempts.
  */
 
 interface Bucket {
   timestamps: number[];
 }
 
+interface LockoutState {
+  failedCount: number;
+  lockedUntil: number;
+}
+
 const buckets = new Map<string, Bucket>();
+const loginLockouts = new Map<string, LockoutState>();
 
 // Periodically clean expired buckets to avoid memory growth
 let lastClean = Date.now();
@@ -20,6 +25,11 @@ function maybeClean() {
     bucket.timestamps = bucket.timestamps.filter((t) => now - t < 15 * 60_000);
     if (bucket.timestamps.length === 0) buckets.delete(key);
   }
+  for (const [key, state] of loginLockouts) {
+    if (state.lockedUntil > 0 && state.lockedUntil <= now) {
+      loginLockouts.delete(key);
+    }
+  }
 }
 
 export interface RateLimitResult {
@@ -29,9 +39,7 @@ export interface RateLimitResult {
 }
 
 /**
- * @param key      unique key, e.g. `form:1.2.3.4` or `login:1.2.3.4`
- * @param limit    max requests within window
- * @param windowMs sliding window duration
+ * Sliding window rate limit check.
  */
 export function rateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
   maybeClean();
@@ -52,6 +60,68 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
   bucket.timestamps.push(now);
   buckets.set(key, bucket);
   return { allowed: true, remaining: limit - bucket.timestamps.length, retryAfterSeconds: 0 };
+}
+
+/**
+ * Checks if a login key is currently locked out after 4 failed attempts (10-min duration).
+ */
+export function checkLoginLock(key: string): { locked: boolean; remainingSeconds: number } {
+  maybeClean();
+  const now = Date.now();
+  const state = loginLockouts.get(key);
+  if (!state) return { locked: false, remainingSeconds: 0 };
+  if (state.lockedUntil > now) {
+    return { locked: true, remainingSeconds: Math.ceil((state.lockedUntil - now) / 1000) };
+  }
+  if (state.lockedUntil <= now && state.lockedUntil > 0) {
+    loginLockouts.delete(key);
+  }
+  return { locked: false, remainingSeconds: 0 };
+}
+
+/**
+ * Records a failed login attempt. Locks key for lockDurationMs if maxAttempts (4) reached.
+ */
+export function recordFailedLogin(
+  key: string,
+  maxAttempts = 4,
+  lockDurationMs = 10 * 60_000
+): {
+  locked: boolean;
+  failedCount: number;
+  attemptsLeft: number;
+  remainingSeconds: number;
+} {
+  maybeClean();
+  const now = Date.now();
+  const state = loginLockouts.get(key) ?? { failedCount: 0, lockedUntil: 0 };
+  state.failedCount += 1;
+
+  if (state.failedCount >= maxAttempts) {
+    state.lockedUntil = now + lockDurationMs;
+    loginLockouts.set(key, state);
+    return {
+      locked: true,
+      failedCount: state.failedCount,
+      attemptsLeft: 0,
+      remainingSeconds: Math.ceil(lockDurationMs / 1000),
+    };
+  }
+
+  loginLockouts.set(key, state);
+  return {
+    locked: false,
+    failedCount: state.failedCount,
+    attemptsLeft: maxAttempts - state.failedCount,
+    remainingSeconds: 0,
+  };
+}
+
+/**
+ * Resets failed login attempt counter upon successful login.
+ */
+export function resetFailedLogin(key: string) {
+  loginLockouts.delete(key);
 }
 
 export function getClientIp(req: Request): string {

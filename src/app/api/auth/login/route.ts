@@ -1,16 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPassword, createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE } from "@/lib/auth";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimit, checkLoginLock, recordFailedLogin, resetFailedLogin, getClientIp } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
 
-/** POST /api/auth/login — admin login (rate limited, httpOnly session cookie) */
+/** POST /api/auth/login — admin login (locks for 10 minutes after 4 failed attempts) */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`login:${ip}`, 8, 15 * 60_000);
+  const lockKey = `login_fail:${ip}`;
+
+  // General rate limit safeguard
+  const rl = rateLimit(`login:${ip}`, 20, 15 * 60_000);
   if (!rl.allowed) {
     return NextResponse.json(
-      { error: `Too many login attempts. Try again in ${Math.ceil(rl.retryAfterSeconds / 60)} minute(s).` },
+      { error: `Too many total requests. Try again in ${Math.ceil(rl.retryAfterSeconds / 60)} minute(s).` },
+      { status: 429 }
+    );
+  }
+
+  // Check 4-attempt / 10-minute lockout rule
+  const lockStatus = checkLoginLock(lockKey);
+  if (lockStatus.locked) {
+    const mins = Math.ceil(lockStatus.remainingSeconds / 60);
+    return NextResponse.json(
+      { error: `Account locked due to 4 consecutive failed login attempts. Please wait ${mins} minute(s) before trying again.` },
       { status: 429 }
     );
   }
@@ -24,8 +37,22 @@ export async function POST(req: NextRequest) {
 
   const admin = await db.adminUser.findUnique({ where: { username } });
   if (!admin || !verifyPassword(password, admin.passwordHash)) {
-    return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
+    const failStatus = recordFailedLogin(lockKey, 4, 10 * 60_000);
+    if (failStatus.locked) {
+      const mins = Math.ceil(failStatus.remainingSeconds / 60);
+      return NextResponse.json(
+        { error: `Account locked due to 4 consecutive failed login attempts. Please wait ${mins} minute(s) before trying again.` },
+        { status: 429 }
+      );
+    }
+    return NextResponse.json(
+      { error: `Invalid username or password. ${failStatus.attemptsLeft} attempt(s) remaining before 10-minute lockout.` },
+      { status: 401 }
+    );
   }
+
+  // Login successful -> reset failed attempt counter
+  resetFailedLogin(lockKey);
 
   const token = createSessionToken(admin);
   await logAudit(db, { adminId: admin.id, username: admin.username, role: admin.role, exp: 0 }, "LOGIN", "auth", admin.id, null);
