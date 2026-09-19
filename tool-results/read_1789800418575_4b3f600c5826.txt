@@ -1,0 +1,493 @@
+   330→              </CardContent>
+   331→            </Card>
+   332→          </Reveal>
+   333→
+   334→          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+   335→            {/* ------------ Form / success ------------ */}
+   336→            <Reveal className="lg:col-span-2" delay={0.05}>
+   337→              {submitted ? (
+   338→                <Card className="border-white/10 bg-card p-0 text-center">
+   339→                  <CardContent className="flex flex-col items-center gap-4 p-8 sm:p-12">
+   340→                    <span className="hex flex h-16 w-16 items-center justify-center bg-gold/15" aria-hidden>
+   341→                      <CheckCircle2 className="h-9 w-9 text-gold" />
+   342→                    </span>
+   343→                    <h2 className="font-display text-xl uppercase tracking-tight text-ink sm:text-2xl">
+   344→                      Thank you. Your appointment request has been received.
+   345→                      <span className="block">Our team will contact you to confirm the details.</span>
+   346→                    </h2>
+   347→
+   348→                    {reference && (
+   349→                      <div className="w-full max-w-md border border-gold/30 bg-gold/[0.06] p-4" role="status">
+   350→                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">
+   351→                          Your tracking reference
+   352→                        </p>
+   353→                        <div className="mt-2 flex items-center gap-4">
+   354→                          <TrackerQr reference={reference} size={88} label="Scan to track" className="shrink-0" />
+   355→                          <div className="min-w-0 flex-1">
+   356→                            <div className="flex items-center justify-between gap-3">
+   357→                              <span className="font-mono text-lg font-bold tracking-[0.22em] text-gold-text">{reference}</span>
+   358→                              <button
+   359→                                type="button"
+   360→                                onClick={async () => {
+   361→                                  try {
+   362→                                    await navigator.clipboard.writeText(reference);
+   363→                                    setCopied(true);
+   364→                                    setTimeout(() => setCopied(false), 2500);
+   365→                                  } catch {
+   366→                                    /* clipboard unavailable — reference remains visible */
+   367→                                  }
+   368→                                }}
+   369→                                className="border border-white/20 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:border-gold/60 hover:text-gold"
+   370→                                aria-live="polite"
+   371→                              >
+   372→                                {copied ? "Copied" : "Copy"}
+   373→                              </button>
+   374→                            </div>
+   375→                            <p className="mt-2 text-xs leading-relaxed text-ash">
+   376→                              Save this code — you can track your request status anytime with it and your mobile number.
+   377→                            </p>
+   378→                            <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("#/track")}>
+   379→                              <Search className="h-4 w-4" aria-hidden />
+   380→                              Track Your Request
+   381→                            </Button>
+   382→                          </div>
+   383→                        </div>
+   384→                      </div>
+   385→                    )}
+   386→
+   387→                    <p className="max-w-md text-sm leading-relaxed text-inkmuted">
+   388→                      Requests are typically confirmed during centre working hours. If your test is time-sensitive,
+   389→                      you can call us directly at{" "}
+   390→                      <a href={BUSINESS.phoneHref} className="font-semibold text-gold hover:text-gold-text">
+   391→                        {BUSINESS.phoneDisplay}
+   392→                      </a>
+   393→                      .
+   394→                    </p>
+   395→                    <div className="mt-2 flex flex-wrap justify-center gap-3">
+   396→                      <Button variant="outline" onClick={() => navigate("#/")}>
+   397→                        <Home className="h-4 w-4" aria-hidden />
+   398→                        Back to Home
+   399→                      </Button>
+   400→                      <Button onClick={resetForm}>
+   401→                        <CalendarCheck className="h-4 w-4" aria-hidden />
+   402→                        Book Another Test
+   403→                      </Button>
+   404→                    </div>
+   405→                  </CardContent>
+   406→                </Card>
+   407→              ) : (
+   408→                <Card className="border-white/10 p-0">
+   409→                  <CardHeader className="pb-2">
+   410→                    <CardTitle className="font-display text-[15px] uppercase tracking-wide text-ink">
+   411→                      Appointment request form
+   412→                    </CardTitle>
+   413→                    <p className="text-sm text-inkmuted">
+   414→                      Fields marked <span aria-hidden>*</span><span className="sr-only">asterisk</span> are required.
+   415→                    </p>
+   416→                  </CardHeader>
+   417→                  <CardContent className="p-5 pt-2 sm:p-6 sm:pt-2">
+   418→                    {apiError && (
+   419→                      <div
+   420→                        role="alert"
+   421→                        className="mb-5 border border-white/10 border-l-2 border-l-destructive bg-white/[0.03] px-4 py-3 text-sm font-medium text-destructive"
+   422→                      >
+   423→                        {apiError}
+   424→                      </div>
+   425→                    )}
+   426→
+   427→                    <form noValidate onSubmit={handleSubmit} className="space-y-5">
+   428→                      {/* Honeypot — hidden from humans, traps bots */}
+   429→                      <div className="hidden" aria-hidden="true">
+   430→                        <label htmlFor="book-website">Website</label>
+   431→                        <input
+   432→                          id="book-website"
+   433→                          type="text"
+   434→                          name="website"
+   435→                          tabIndex={-1}
+   436→                          autoComplete="off"
+   437→                          value={form.website}
+   438→                          onChange={(e) => set("website", e.target.value)}
+   439→                        />
+   440→                      </div>
+   441→
+   442→                      <div className="grid gap-5 sm:grid-cols-2">
+   443→                        <div>
+   444→                          <Label htmlFor="book-name" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   445→                            Full Name <span aria-hidden>*</span>
+   446→                          </Label>
+   447→                          <Input
+   448→                            id="book-name"
+   449→                            type="text"
+   450→                            autoComplete="name"
+   451→                            placeholder="e.g. Priya Sharma"
+   452→                            value={form.name}
+   453→                            onChange={(e) => set("name", e.target.value)}
+   454→                            aria-invalid={!!errors.name}
+   455→                            aria-describedby={errors.name ? "book-name-error" : undefined}
+   456→                            className="mt-1.5 border-white/15 bg-iron text-ink placeholder:text-inkmuted focus-visible:border-gold focus-visible:ring-gold/40"
+   457→                          />
+   458→                          <FieldError id="book-name-error" message={errors.name} />
+   459→                        </div>
+   460→
+   461→                        <div>
+   462→                          <Label htmlFor="book-mobile" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   463→                            Mobile Number <span aria-hidden>*</span>
+   464→                          </Label>
+   465→                          <div className="mt-1.5 flex items-stretch gap-2">
+   466→                            <span className="inline-flex select-none items-center border border-white/15 bg-iron px-3 text-sm font-semibold text-ink">
+   467→                              +91
+   468→                            </span>
+   469→                            <Input
+   470→                              id="book-mobile"
+   471→                              type="tel"
+   472→                              inputMode="numeric"
+   473→                              autoComplete="tel-national"
+   474→                              placeholder="98765 43210"
+   475→                              value={form.mobile}
+   476→                              onChange={(e) => set("mobile", e.target.value)}
+   477→                              aria-invalid={!!errors.mobile}
+   478→                              aria-describedby={errors.mobile ? "book-mobile-error" : undefined}
+   479→                              className="border-white/15 bg-iron text-ink placeholder:text-inkmuted focus-visible:border-gold focus-visible:ring-gold/40"
+   480→                            />
+   481→                          </div>
+   482→                          <FieldError id="book-mobile-error" message={errors.mobile} />
+   483→                        </div>
+   484→                      </div>
+   485→
+   486→                      <div>
+   487→                        <Label htmlFor="book-email" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   488→                          Email (optional)
+   489→                        </Label>
+   490→                        <Input
+   491→                          id="book-email"
+   492→                          type="email"
+   493→                          autoComplete="email"
+   494→                          placeholder="you@example.com"
+   495→                          value={form.email}
+   496→                          onChange={(e) => set("email", e.target.value)}
+   497→                          aria-invalid={!!errors.email}
+   498→                          aria-describedby={errors.email ? "book-email-error" : undefined}
+   499→                          className="mt-1.5 border-white/15 bg-iron text-ink placeholder:text-inkmuted focus-visible:border-gold focus-visible:ring-gold/40"
+   500→                        />
+   501→                        <FieldError id="book-email-error" message={errors.email} />
+   502→                      </div>
+   503→
+   504→                      <div>
+   505→                        <Label htmlFor="book-test" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   506→                          Test or Package <span aria-hidden>*</span>
+   507→                        </Label>
+   508→                        <Select value={form.testValue} onValueChange={(v) => set("testValue", v)}>
+   509→                          <SelectTrigger
+   510→                            id="book-test"
+   511→                            aria-invalid={!!errors.testValue}
+   512→                            aria-describedby={errors.testValue ? "book-test-error" : undefined}
+   513→                            className="mt-1.5 w-full border-white/15 bg-iron text-ink focus-visible:border-gold focus-visible:ring-gold/40 data-[placeholder]:text-inkmuted"
+   514→                          >
+   515→                            <SelectValue placeholder="Select a test, package, or Other" />
+   516→                          </SelectTrigger>
+   517→                          <SelectContent className="max-h-72">
+   518→                            <SelectGroup>
+   519→                              <SelectLabel>Services</SelectLabel>
+   520→                              {services.length === 0 && (
+   521→                                <SelectItem value="__no_services__" disabled>
+   522→                                  Loading services…
+   523→                                </SelectItem>
+   524→                              )}
+   525→                              {services.map((s) => (
+   526→                                <SelectItem key={s.slug} value={`service:${s.slug}`}>
+   527→                                  {s.name}
+   528→                                </SelectItem>
+   529→                              ))}
+   530→                            </SelectGroup>
+   531→                            <SelectGroup>
+   532→                              <SelectLabel>Health Packages</SelectLabel>
+   533→                              {packages.map((p) => (
+   534→                                <SelectItem key={p.slug} value={`package:${p.slug}`}>
+   535→                                  {p.name}
+   536→                                </SelectItem>
+   537→                              ))}
+   538→                            </SelectGroup>
+   539→                            <SelectGroup>
+   540→                              <SelectLabel>Other</SelectLabel>
+   541→                              <SelectItem value={OTHER_OPTION}>Other (specify in message)</SelectItem>
+   542→                            </SelectGroup>
+   543→                          </SelectContent>
+   544→                        </Select>
+   545→                        <FieldError id="book-test-error" message={errors.testValue} />
+   546→
+   547→                        {/* Live preparation hint from the selected service/package */}
+   548→                        {selectedTest?.preparation && (
+   549→                          <div
+   550→                            role="note"
+   551→                            aria-live="polite"
+   552→                            className="mt-3 flex items-start gap-3 border border-gold/25 border-l-2 border-l-gold bg-white/[0.03] px-4 py-3"
+   553→                          >
+   554→                            <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden />
+   555→                            <div>
+   556→                              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-text">
+   557→                                Preparation — {selectedTest.name}
+   558→                              </p>
+   559→                              <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-inkmuted">
+   560→                                {selectedTest.preparation}
+   561→                              </p>
+   562→                              <p className="mt-1.5 text-[11px] uppercase tracking-[0.1em] text-steel">
+   563→                                Indicative — the centre confirms final instructions on call.
+   564→                              </p>
+   565→                            </div>
+   566→                          </div>
+   567→                        )}
+   568→                      </div>
+   569→
+   570→                      <div className="grid gap-5 sm:grid-cols-2">
+   571→                        <div>
+   572→                          <Label htmlFor="book-date" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   573→                            Preferred Date
+   574→                          </Label>
+   575→                          <Input
+   576→                            id="book-date"
+   577→                            type="date"
+   578→                            min={minDate}
+   579→                            value={form.preferredDate}
+   580→                            onChange={(e) => set("preferredDate", e.target.value)}
+   581→                            aria-invalid={!!liveDateIssue}
+   582→                            aria-describedby={liveDateIssue ? "book-date-issue" : "book-date-hint"}
+   583→                            className="mt-1.5 border-white/15 bg-iron text-ink focus-visible:border-gold focus-visible:ring-gold/40"
+   584→                          />
+   585→                          {liveDateIssue ? (
+   586→                            <p id="book-date-issue" role="alert" aria-live="polite" className="mt-1.5 text-xs font-medium text-destructive">
+   587→                              {liveDateIssue}
+   588→                            </p>
+   589→                          ) : (
+   590→                            <p id="book-date-hint" className="mt-1.5 text-xs text-inkmuted">Optional — final slot is confirmed by phone.</p>
+   591→                          )}
+   592→                        </div>
+   593→                        <div>
+   594→                          <Label htmlFor="book-time" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   595→                            Preferred Time
+   596→                          </Label>
+   597→                          <Select value={form.preferredTime} onValueChange={(v) => set("preferredTime", v)}>
+   598→                            <SelectTrigger
+   599→                              id="book-time"
+   600→                              aria-invalid={!!liveSlotIssue}
+   601→                              aria-describedby={liveSlotIssue ? "book-time-issue" : "book-time-hint"}
+   602→                              className="mt-1.5 w-full border-white/15 bg-iron text-ink focus-visible:border-gold focus-visible:ring-gold/40 data-[placeholder]:text-inkmuted"
+   603→                            >
+   604→                              <SelectValue placeholder="Any time (we will confirm)" />
+   605→                            </SelectTrigger>
+   606→                            <SelectContent>
+   607→                              {TIME_SLOTS.map((slot) => {
+   608→                                const outside = !!slotIssue(slot);
+   609→                                return (
+   610→                                  <SelectItem key={slot} value={slot} disabled={outside}>
+   611→                                    {slot}
+   612→                                    {outside && (
+   613→                                      <span className="pl-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-inkmuted">
+   614→                                        — outside opening hours
+   615→                                      </span>
+   616→                                    )}
+   617→                                  </SelectItem>
+   618→                                );
+   619→                              })}
+   620→                            </SelectContent>
+   621→                          </Select>
+   622→                          {liveSlotIssue ? (
+   623→                            <p id="book-time-issue" role="alert" aria-live="polite" className="mt-1.5 text-xs font-medium text-destructive">
+   624→                              {liveSlotIssue}
+   625→                            </p>
+   626→                          ) : dayHours ? (
+   627→                            <p id="book-time-hint" aria-live="polite" className="mt-1.5 text-xs text-inkmuted">
+   628→                              Open {fmtMinutes(dayHours[0])} – {fmtMinutes(dayHours[1])} on the selected day. Slots outside these hours are unavailable.
+   629→                            </p>
+   630→                          ) : (
+   631→                            <p id="book-time-hint" className="mt-1.5 text-xs text-inkmuted">Optional — final slot is confirmed by phone.</p>
+   632→                          )}
+   633→                        </div>
+   634→                      </div>
+   635→
+   636→                      {showHomeCollection && (
+   637→                        <div className="border border-white/10 bg-white/[0.03] p-4">
+   638→                          <label
+   639→                            htmlFor="book-homecollection"
+   640→                            className="flex cursor-pointer items-start gap-3 text-sm font-medium text-ink"
+   641→                          >
+   642→                            <Checkbox
+   643→                              id="book-homecollection"
+   644→                              checked={form.homeCollection}
+   645→                              onCheckedChange={(v) => set("homeCollection", v === true)}
+   646→                              className="mt-0.5"
+   647→                            />
+   648→                            <span>
+   649→                              Request home sample collection
+   650→                              {settings.homeCollectionAvailable === "tbc" && (
+   651→                                <span className="mt-1 block text-xs font-normal text-inkmuted">
+   652→                                  Subject to availability — our team will confirm.
+   653→                                </span>
+   654→                              )}
+   655→                            </span>
+   656→                          </label>
+   657→                        </div>
+   658→                      )}
+   659→
+   660→                      <div>
+   661→                        <Label htmlFor="book-message" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+   662→                          Message
+   663→                        </Label>
+   664→                        <Textarea
+   665→                          id="book-message"
+   666→                          rows={4}
+   667→                          placeholder="Any details that help us prepare — e.g. doctor's reference, preferred language, questions about preparation."
+   668→                          value={form.message}
+   669→                          onChange={(e) => set("message", e.target.value)}
+   670→                          aria-invalid={!!errors.message}
+   671→                          aria-describedby={errors.message ? "book-message-error" : "book-message-hint"}
+   672→                          className="mt-1.5 border-white/15 bg-iron text-ink placeholder:text-inkmuted focus-visible:border-gold focus-visible:ring-gold/40"
+   673→                        />
+   674→                        <p id="book-message-hint" className="mt-1.5 text-xs text-inkmuted">
+   675→                          Optional. Please avoid sharing sensitive medical information here.
+   676→                        </p>
+   677→                        <FieldError id="book-message-error" message={errors.message} />
+   678→                      </div>
+   679→
+   680→                      <div className="border border-white/10 bg-white/[0.03] p-4">
+   681→                        <label
+   682→                          htmlFor="book-consent"
+   683→                          className="flex cursor-pointer items-start gap-3 text-sm font-medium text-ink"
+   684→                        >
+   685→                          <Checkbox
+   686→                            id="book-consent"
+   687→                            checked={form.consent}
+   688→                            onCheckedChange={(v) => set("consent", v === true)}
+   689→                            aria-invalid={!!errors.consent}
+   690→                            aria-describedby={errors.consent ? "book-consent-error" : undefined}
+   691→                            className="mt-0.5"
+   692→                          />
+   693→                          <span>
+   694→                            I agree to be contacted by Crystal Diagnostic Centre regarding this request.{" "}
+   695→                            <span aria-hidden>*</span>
+   696→                          </span>
+   697→                        </label>
+   698→                        <FieldError id="book-consent-error" message={errors.consent} />
+   699→                      </div>
+   700→
+   701→                      {/* Live request summary — aero-cut plate with gold corner ticks */}
+   702→                      {summaryTest && (
+   703→                        <div className="relative border border-white/10 bg-white/[0.03] p-4" aria-live="polite">
+   704→                          <span aria-hidden className="absolute left-0 top-0 h-2.5 w-2.5 border-l-2 border-t-2 border-gold" />
+   705→                          <span aria-hidden className="absolute right-0 top-0 h-2.5 w-2.5 border-r-2 border-t-2 border-gold" />
+   706→                          <span aria-hidden className="absolute bottom-0 left-0 h-2.5 w-2.5 border-b-2 border-l-2 border-gold" />
+   707→                          <span aria-hidden className="absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-gold" />
+   708→                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-text">
+   709→                            Your request at a glance
+   710→                          </p>
+   711→                          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] sm:grid-cols-4">
+   712→                            <div>
+   713→                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Test / Package</dt>
+   714→                              <dd className="mt-0.5 truncate font-semibold text-ink" title={summaryTest}>{summaryTest}</dd>
+   715→                            </div>
+   716→                            <div>
+   717→                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Date</dt>
+   718→                              <dd className="mt-0.5 font-semibold text-ink">
+   719→                                {form.preferredDate
+   720→                                  ? new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${form.preferredDate}T12:00:00+05:30`))
+   721→                                  : "—"}
+   722→                              </dd>
+   723→                            </div>
+   724→                            <div>
+   725→                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Time</dt>
+   726→                              <dd className="mt-0.5 font-semibold text-ink">{form.preferredTime || "Any time"}</dd>
+   727→                            </div>
+   728→                            <div>
+   729→                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Mode</dt>
+   730→                              <dd className="mt-0.5 font-semibold text-ink">{form.homeCollection ? "Home collection" : "Centre visit"}</dd>
+   731→                            </div>
+   732→                          </dl>
+   733→                        </div>
+   734→                      )}
+   735→
+   736→                      <Button type="submit" size="lg" disabled={submitting} className="w-full">
+   737→                        {submitting ? (
+   738→                          <>
+   739→                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+   740→                            Sending request…
+   741→                          </>
+   742→                        ) : (
+   743→                          <>
+   744→                            <Send className="h-4 w-4" aria-hidden />
+   745→                            Send Appointment Request
+   746→                          </>
+   747→                        )}
+   748→                      </Button>
+   749→                      <p className="text-xs leading-relaxed text-inkmuted">
+   750→                        This form sends a <strong>request</strong> only — slots are confirmed by our team over the
+   751→                        phone. No payment is collected online.
+   752→                      </p>
+   753→                    </form>
+   754→                  </CardContent>
+   755→                </Card>
+   756→              )}
+   757→            </Reveal>
+   758→
+   759→            {/* ------------ Sidebar ------------ */}
+   760→            <div className="space-y-6">
+   761→              <Reveal delay={0.1}>
+   762→                <Card className="border-white/10 p-0">
+   763→                  <CardHeader className="pb-2">
+   764→                    <CardTitle className="font-display text-[14px] uppercase tracking-wide text-ink">
+   765→                      Contact & visiting
+   766→                    </CardTitle>
+   767→                  </CardHeader>
+   768→                  <CardContent className="space-y-4 p-5 pt-0">
+   769→                    <div className="flex items-start gap-3">
+   770→                      <Phone className="mt-0.5 h-4.5 w-4.5 shrink-0 text-teal" aria-hidden />
+   771→                      <div>
+   772→                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">Phone</p>
+   773→                        <a
+   774→                          href={BUSINESS.phoneHref}
+   775→                          className="text-sm font-semibold text-ink transition-colors hover:text-gold"
+   776→                        >
+   777→                          {settings.phone || BUSINESS.phoneDisplay}
+   778→                        </a>
+   779→                      </div>
+   780→                    </div>
+   781→                    <Separator className="bg-white/10" />
+   782→                    <div className="flex items-start gap-3">
+   783→                      <MapPin className="mt-0.5 h-4.5 w-4.5 shrink-0 text-teal" aria-hidden />
+   784→                      <div>
+   785→                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">Address</p>
+   786→                        <p className="whitespace-pre-line text-sm leading-relaxed text-ink">{settings.address}</p>
+   787→                      </div>
+   788→                    </div>
+   789→                    <Separator className="bg-white/10" />
+   790→                    <div className="flex items-start gap-3">
+   791→                      <Clock className="mt-0.5 h-4.5 w-4.5 shrink-0 text-teal" aria-hidden />
+   792→                      <div>
+   793→                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-steel">Working Hours</p>
+   794→                        <p className="whitespace-pre-line text-sm leading-relaxed text-ink">{settings.workingHours}</p>
+   795→                      </div>
+   796→                    </div>
+   797→                  </CardContent>
+   798→                </Card>
+   799→              </Reveal>
+   800→
+   801→              <Reveal delay={0.15}>
+   802→                <Card className="border-white/10 bg-white/[0.03] p-0">
+   803→                  <CardContent className="flex items-start gap-3 p-5">
+   804→                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden />
+   805→                    <div>
+   806→                      <p className="text-sm font-semibold uppercase tracking-wide text-ink">No online payment</p>
+   807→                      <p className="mt-1 text-xs leading-relaxed text-inkmuted">
+   808→                        Booking a test on this website is free. Payments, if applicable, are collected only at the
+   809→                        centre after your visit is confirmed.
+   810→                      </p>
+   811→                    </div>
+   812→                  </CardContent>
+   813→                </Card>
+   814→              </Reveal>
+   815→            </div>
+   816→          </div>
+   817→        </div>
+   818→      </section>
+   819→    </>
+   820→  );
+   821→}
+   822→

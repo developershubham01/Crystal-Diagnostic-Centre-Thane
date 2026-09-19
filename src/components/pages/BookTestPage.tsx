@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
+  Check,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -10,10 +11,12 @@ import {
   Info,
   MapPin,
   Phone,
+  Printer,
   Search,
   Send,
   ShieldCheck,
   Loader2,
+  X,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api-client";
 import { usePageMeta } from "@/lib/seo";
@@ -21,6 +24,8 @@ import { useSettings } from "@/lib/hooks";
 import { useRouterStore } from "@/lib/store";
 import { useServices, usePackages } from "@/lib/hooks";
 import { BUSINESS } from "@/lib/constants";
+import { LOGO_MARK_SVG } from "@/components/brand/Logo";
+import { PRINT_STYLES, openPrintWindow } from "@/lib/print-window";
 import { DEFAULT_HOURS, parseWorkingHours, type WeekHours } from "@/components/site/OpenNowBadge";
 import { Breadcrumbs, JsonLd, PageHero, breadcrumbSchema, type Crumb } from "@/components/site/Shared";
 import { Reveal } from "@/components/site/Reveal";
@@ -72,11 +77,16 @@ function fmtMinutes(mins: number): string {
 
 const OTHER_OPTION = "__other__";
 
+/** A single request can bundle at most this many tests/packages. */
+const MAX_TESTS = 8;
+/** Hard cap for the joined test list sent to the API (keeps day sheets tidy). */
+const MAX_TESTS_CHARS = 500;
+
 interface FormState {
   name: string;
   mobile: string;
   email: string;
-  testValue: string;
+  testValues: string[];
   preferredDate: string;
   preferredTime: string;
   homeCollection: boolean;
@@ -89,7 +99,7 @@ const INITIAL_FORM: FormState = {
   name: "",
   mobile: "",
   email: "",
-  testValue: "",
+  testValues: [],
   preferredDate: "",
   preferredTime: "",
   homeCollection: false,
@@ -147,6 +157,14 @@ export function BookTestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [reference, setReference] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [dupeHint, setDupeHint] = useState<string | null>(null);
+
+  // Auto-dismiss the duplicate/limit hint so it never lingers stale.
+  useEffect(() => {
+    if (!dupeHint) return;
+    const t = setTimeout(() => setDupeHint(null), 2800);
+    return () => clearTimeout(t);
+  }, [dupeHint]);
 
   const minDate = useMemo(todayIso, []);
 
@@ -201,23 +219,52 @@ export function BookTestPage() {
     return map;
   }, [services, packages]);
 
-  /** Human label of the chosen test/package — drives the live summary plate. */
-  const summaryTest = form.testValue ? (testOptions.get(form.testValue) ?? null) : null;
+  /** Human labels of the bundled tests — drives chips, summary plate and submit. */
+  const testLabels = useMemo(
+    () => form.testValues.map((v) => testOptions.get(v) ?? v),
+    [form.testValues, testOptions]
+  );
+  const summaryLabel = testLabels.join(" + ");
 
-  // Preparation guidance for the currently selected service/package —
-  // surfaced right under the dropdown so patients book correctly first time.
-  const selectedTest = useMemo(() => {
-    const v = form.testValue;
-    if (v.startsWith("service:")) {
-      const s = services.find((x) => x.slug === v.slice(8));
-      return s ? { name: s.name, preparation: s.preparation } : null;
+  /** Adds a test/package to the visit list (ignores duplicates, caps the bundle). */
+  function addTest(value: string) {
+    if (!value) return;
+    setErrors((e) => (e.testValues ? { ...e, testValues: undefined } : e));
+    if (form.testValues.includes(value)) {
+      setDupeHint(`“${testOptions.get(value) ?? value}” is already in your visit list.`);
+      return;
     }
-    if (v.startsWith("package:")) {
-      const p = packages.find((x) => x.slug === v.slice(8));
-      return p ? { name: p.name, preparation: p.preparation } : null;
+    if (form.testValues.length >= MAX_TESTS) {
+      setDupeHint(`You can bundle up to ${MAX_TESTS} tests per request — call us for larger panels.`);
+      return;
     }
-    return null;
-  }, [form.testValue, services, packages]);
+    setForm((f) => ({ ...f, testValues: [...f.testValues, value] }));
+    setDupeHint(null);
+  }
+
+  function removeTest(value: string) {
+    setForm((f) => ({ ...f, testValues: f.testValues.filter((v) => v !== value) }));
+    setErrors((e) => (e.testValues ? { ...e, testValues: undefined } : e));
+  }
+
+  // Preparation guidance for every selected service/package — surfaced as a
+  // stack under the picker so patients book correctly first time.
+  const prepItems = useMemo(() => {
+    const items = form.testValues.map((v) => {
+      if (v.startsWith("service:")) {
+        const s = services.find((x) => x.slug === v.slice(8));
+        return s?.preparation ? { name: s.name, preparation: s.preparation } : null;
+      }
+      if (v.startsWith("package:")) {
+        const p = packages.find((x) => x.slug === v.slice(8));
+        return p?.preparation ? { name: p.name, preparation: p.preparation } : null;
+      }
+      return null;
+    });
+    return items.filter((x): x is { name: string; preparation: string } => x !== null);
+  }, [form.testValues, services, packages]);
+  const visiblePrep = prepItems.slice(0, 3);
+  const hiddenPrepCount = prepItems.length - visiblePrep.length;
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -232,7 +279,11 @@ export function BookTestPage() {
     if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       errs.email = "Enter a valid email address (or leave it blank).";
     }
-    if (!form.testValue) errs.testValue = "Please choose a test, package, or 'Other'.";
+    if (form.testValues.length === 0) {
+      errs.testValues = "Please choose at least one test, package, or 'Other'.";
+    } else if (summaryLabel.length > MAX_TESTS_CHARS) {
+      errs.testValues = "The selected list is too long — please call us to book large panels.";
+    }
     const dateProblem = form.preferredDate ? dateIssue(form.preferredDate) : null;
     if (dateProblem) errs.preferredDate = dateProblem;
     if (!dateProblem && form.preferredTime) {
@@ -257,12 +308,11 @@ export function BookTestPage() {
 
     setSubmitting(true);
     try {
-      const label = testOptions.get(form.testValue) ?? form.testValue;
       const res = await api.post<{ ok: boolean; id: string; reference?: string }>("/api/appointments", {
         name: form.name.trim(),
         mobile: normaliseMobile(form.mobile),
         email: form.email.trim() || undefined,
-        testOrPackage: label,
+        testOrPackage: summaryLabel,
         preferredDate: form.preferredDate || undefined,
         preferredTime: form.preferredTime || undefined,
         homeCollection: form.homeCollection,
@@ -296,6 +346,48 @@ export function BookTestPage() {
     setSubmitted(false);
     setReference(null);
     setCopied(false);
+  }
+
+  /**
+   * Patient-side black-on-white confirmation printout — the same paper
+   * language as the front-desk slip, minus internal fields. The QR image
+   * is lifted from the rendered confirmation card so the printout carries
+   * the same scan-to-track tile the patient sees on screen.
+   */
+  function printConfirmation() {
+    if (!reference) return;
+    const esc = (s: unknown) =>
+      String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+    const qrImg = document.querySelector<HTMLImageElement>("#booking-confirmation img[alt]");
+    const qrSrc = qrImg?.getAttribute("src") ?? "";
+    const prettyDate = form.preferredDate
+      ? new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }).format(
+          new Date(`${form.preferredDate}T12:00:00+05:30`)
+        )
+      : "Any — confirmed on call";
+    const trackUrl = `${location.origin}/#/track?reference=${reference}&mobile=${normaliseMobile(form.mobile)}`;
+    const html = `<!doctype html><html><head><meta charset="utf-8" /><title>Booking confirmation ${esc(reference)}</title>
+<style>${PRINT_STYLES}</style></head><body>
+  <div class="head">
+    <div class="brand">${LOGO_MARK_SVG}<div class="bname">CRYSTAL DIAGNOSTIC CENTRE<small>UTHALSAR NAKA · THANE WEST · +91 88283 93955</small></div></div>
+    <div class="ref"><div class="label">TRACKING REFERENCE</div><div class="code">${esc(reference)}</div></div>
+  </div>
+  <h1>APPOINTMENT REQUEST CONFIRMATION</h1>
+  <table>
+    <tr><td class="k">Patient</td><td><strong>${esc(form.name.trim())}</strong></td></tr>
+    <tr><td class="k">Mobile</td><td>+91 ${esc(normaliseMobile(form.mobile))}</td></tr>
+    ${form.email.trim() ? `<tr><td class="k">Email</td><td>${esc(form.email.trim())}</td></tr>` : ""}
+    <tr><td class="k">Test(s) / Package(s)</td><td><strong>${esc(summaryLabel)}</strong></td></tr>
+    <tr><td class="k">Preferred date</td><td>${esc(prettyDate)}</td></tr>
+    <tr><td class="k">Preferred time</td><td>${form.preferredTime ? esc(form.preferredTime) : "Any (we will confirm)"}</td></tr>
+    <tr><td class="k">Mode</td><td>${form.homeCollection ? "Home collection requested" : "Visit at the centre"}</td></tr>
+  </table>
+  ${qrSrc ? `<div style="margin-top:20px;"><img src="${qrSrc}" width="120" height="120" alt="" /><div style="font-size:9px;letter-spacing:0.18em;color:#555;margin-top:6px;">SCAN TO TRACK THIS REQUEST</div></div>` : ""}
+  <div class="sign"><span>Patient signature</span><span>Received at centre</span></div>
+  <div class="foot">Track this request any time at ${esc(trackUrl)} using the reference code and mobile number. This is an appointment request confirmation — our team will call to confirm the final slot. Not a medical report or bill.</div>
+  <script>window.onload = function () { window.focus(); window.print(); };</script>
+</body></html>`;
+    openPrintWindow(html);
   }
 
   const showHomeCollection = settings.homeCollectionAvailable !== "no";
@@ -335,7 +427,7 @@ export function BookTestPage() {
             {/* ------------ Form / success ------------ */}
             <Reveal className="lg:col-span-2" delay={0.05}>
               {submitted ? (
-                <Card className="border-white/10 bg-card p-0 text-center">
+                <Card id="booking-confirmation" className="border-white/10 bg-card p-0 text-center">
                   <CardContent className="flex flex-col items-center gap-4 p-8 sm:p-12">
                     <span className="hex flex h-16 w-16 items-center justify-center bg-gold/15" aria-hidden>
                       <CheckCircle2 className="h-9 w-9 text-gold" />
@@ -378,6 +470,15 @@ export function BookTestPage() {
                             <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("#/track")}>
                               <Search className="h-4 w-4" aria-hidden />
                               Track Your Request
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2 w-full border-gold/40 text-gold hover:bg-gold hover:text-black"
+                              onClick={printConfirmation}
+                            >
+                              <Printer className="h-4 w-4" aria-hidden />
+                              Print Confirmation
                             </Button>
                           </div>
                         </div>
@@ -502,17 +603,27 @@ export function BookTestPage() {
                       </div>
 
                       <div>
-                        <Label htmlFor="book-test" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
-                          Test or Package <span aria-hidden>*</span>
-                        </Label>
-                        <Select value={form.testValue} onValueChange={(v) => set("testValue", v)}>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <Label htmlFor="book-test" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-steel">
+                            Test or Package <span aria-hidden>*</span>
+                          </Label>
+                          {testLabels.length > 0 && (
+                            <span
+                              className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-gold-text"
+                              aria-live="polite"
+                            >
+                              {testLabels.length} selected
+                            </span>
+                          )}
+                        </div>
+                        <Select value="" onValueChange={addTest}>
                           <SelectTrigger
                             id="book-test"
-                            aria-invalid={!!errors.testValue}
-                            aria-describedby={errors.testValue ? "book-test-error" : undefined}
+                            aria-invalid={!!errors.testValues}
+                            aria-describedby={errors.testValues ? "book-test-error" : undefined}
                             className="mt-1.5 w-full border-white/15 bg-iron text-ink focus-visible:border-gold focus-visible:ring-gold/40 data-[placeholder]:text-inkmuted"
                           >
-                            <SelectValue placeholder="Select a test, package, or Other" />
+                            <SelectValue placeholder={testLabels.length === 0 ? "Select a test, package, or Other" : "Add another test…"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-72">
                             <SelectGroup>
@@ -542,28 +653,71 @@ export function BookTestPage() {
                             </SelectGroup>
                           </SelectContent>
                         </Select>
-                        <FieldError id="book-test-error" message={errors.testValue} />
+                        <FieldError id="book-test-error" message={errors.testValues} />
 
-                        {/* Live preparation hint from the selected service/package */}
-                        {selectedTest?.preparation && (
+                        {/* Bundled tests — aero-cut chips with gold tick + remove */}
+                        {testLabels.length > 0 && (
+                          <ul
+                            aria-label={testLabels.length === 1 ? "Selected test" : "Selected tests"}
+                            className="mt-3 flex flex-wrap gap-2"
+                          >
+                            {testLabels.map((label, i) => (
+                              <li
+                                key={form.testValues[i]}
+                                className="inline-flex animate-in fade-in slide-in-from-bottom-1 items-center gap-2 border border-white/15 bg-white/[0.05] py-1 pl-2.5 pr-1 text-xs font-semibold text-ink duration-200"
+                              >
+                                <Check className="h-3.5 w-3.5 shrink-0 text-gold" aria-hidden />
+                                <span className="max-w-[230px] truncate" title={label}>
+                                  {label}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeTest(form.testValues[i])}
+                                  aria-label={`Remove ${label} from request`}
+                                  className="flex h-5 w-5 items-center justify-center text-inkmuted transition-colors hover:bg-gold hover:text-black"
+                                >
+                                  <X className="h-3 w-3" aria-hidden />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {dupeHint && (
+                          <p role="status" aria-live="polite" className="mt-2 text-xs font-medium text-gold-text">
+                            {dupeHint}
+                          </p>
+                        )}
+                        {testLabels.length > 1 && (
+                          <p className="mt-2 text-[11px] uppercase tracking-[0.12em] text-steel">
+                            Bundled into one request — one call confirms the whole visit.
+                          </p>
+                        )}
+
+                        {/* Live preparation hints for every bundled test (max 3 shown) */}
+                        {visiblePrep.map((item) => (
                           <div
+                            key={item.name}
                             role="note"
-                            aria-live="polite"
                             className="mt-3 flex items-start gap-3 border border-gold/25 border-l-2 border-l-gold bg-white/[0.03] px-4 py-3"
                           >
                             <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden />
                             <div>
                               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-text">
-                                Preparation — {selectedTest.name}
+                                Preparation — {item.name}
                               </p>
                               <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-inkmuted">
-                                {selectedTest.preparation}
+                                {item.preparation}
                               </p>
                               <p className="mt-1.5 text-[11px] uppercase tracking-[0.1em] text-steel">
                                 Indicative — the centre confirms final instructions on call.
                               </p>
                             </div>
                           </div>
+                        ))}
+                        {hiddenPrepCount > 0 && (
+                          <p className="mt-2 text-[11px] uppercase tracking-[0.1em] text-steel" aria-live="polite">
+                            + {hiddenPrepCount} more with preparation notes — see each service page.
+                          </p>
                         )}
                       </div>
 
@@ -699,19 +853,41 @@ export function BookTestPage() {
                       </div>
 
                       {/* Live request summary — aero-cut plate with gold corner ticks */}
-                      {summaryTest && (
+                      {summaryLabel && (
                         <div className="relative border border-white/10 bg-white/[0.03] p-4" aria-live="polite">
                           <span aria-hidden className="absolute left-0 top-0 h-2.5 w-2.5 border-l-2 border-t-2 border-gold" />
                           <span aria-hidden className="absolute right-0 top-0 h-2.5 w-2.5 border-r-2 border-t-2 border-gold" />
                           <span aria-hidden className="absolute bottom-0 left-0 h-2.5 w-2.5 border-b-2 border-l-2 border-gold" />
                           <span aria-hidden className="absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-gold" />
-                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-text">
-                            Your request at a glance
-                          </p>
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-text">
+                              Your request at a glance
+                            </p>
+                            {testLabels.length > 1 && (
+                              <span className="border border-gold/40 bg-gold/[0.08] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-gold-text">
+                                {testLabels.length} tests
+                              </span>
+                            )}
+                          </div>
                           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] sm:grid-cols-4">
-                            <div>
-                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Test / Package</dt>
-                              <dd className="mt-0.5 truncate font-semibold text-ink" title={summaryTest}>{summaryTest}</dd>
+                            <div className={testLabels.length > 1 ? "col-span-2 sm:col-span-4" : undefined}>
+                              <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">
+                                {testLabels.length > 1 ? "Bundled tests" : "Test / Package"}
+                              </dt>
+                              <dd className="mt-0.5 font-semibold text-ink" title={summaryLabel}>
+                                {testLabels.length > 1 ? (
+                                  <span className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                    {testLabels.map((label, i) => (
+                                      <span key={form.testValues[i]}>
+                                        {i > 0 && <span className="mr-2 text-gold" aria-hidden>+</span>}
+                                        {label}
+                                      </span>
+                                    ))}
+                                  </span>
+                                ) : (
+                                  summaryLabel
+                                )}
+                              </dd>
                             </div>
                             <div>
                               <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-steel">Date</dt>
